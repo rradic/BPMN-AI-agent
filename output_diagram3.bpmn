@@ -1,0 +1,494 @@
+**Okay, let's break down this BPMN 2.0 XML generation task.**  First, I've got to nail the goal: a *valid* XML file representing a business process, including the diagram data. It's got to be a clean, standalone file.
+
+Next, I need to translate this text into BPMN elements. I'm going through each step, deciding if it's a Service Task, User Task (as requested, even though it could be a Receive Task in this context), Gateway, Event, etc.  I'm keeping the main flow in mind and mapping out the exception paths, particularly around the fraud review and payment failures. I'm also planning for the layout. I'm calculating the X/Y coordinates for each element, keeping it organized and readable.
+
+I'm thinking left-to-right primarily, with deviations for gateways and branches. I've got standard widths and spacing figured out. I'm mentally sketching the XML structure, thinking about the definitions, the process, the diagram. I'm ensuring I have unique IDs and that I connect the elements with sequence flows. I'm also refining the logic around the gateways, particularly merging the paths after the fraud check and the payment result, taking care not to have duplicated sequence flows. I'm also considering any BPMN standards for proper merges and ensuring that I won't violate any rules of the standard.
+
+I'm starting to build the XML element-by-element (mentally at first, and then on the keyboard). I'm focusing on the start event, service tasks, gateways, and end events. I'm making sure each element is correctly defined, with its ID and attributes. Then, I'm carefully connecting the elements with sequence flows, paying close attention to the gateway logic to ensure the process flow is correct, and considering the proper location of any required join or merge gateways.  I'm also double-checking my calculations for the coordinates.
+
+Finally, I'll generate the actual XML. I'll make sure the root elements, the process element, and the diagram interchange data are all present and well-formed. I'm going to review the syntax, the element tags and the attributes and make sure all the IDs in the sequence flows match the IDs of the corresponding tasks and events. The XML should validate without any errors.  And that should be it - a valid BPMN 2.0 XML representation of the business process.
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="AI_Architect" exporterVersion="1.0">
+  <bpmn:process id="Process_Order_to_Cash" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Order is submitted">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_ValidateCust" name="Validate customer identity and account">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_CheckProd" name="Check product availability and license constraints">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_CalcPrice" name="Calculate pricing and discounts">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_ApplyTax" name="Apply taxes and regulatory compliance">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Activity_PresentQuote" name="Present quote to customer">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="Activity_CustReview" name="Customer reviews and accepts quote">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Activity_CreateSO" name="Create sales order">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_LinkCRM" name="Link order to CRM record">
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_FraudAssess" name="Perform fraud risk assessment">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_FraudEval" name="Fraud risk evaluated">
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_Hold</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PassFraud</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Activity_RiskReview" name="Place order on hold for manual review">
+      <bpmn:incoming>Flow_Hold</bpmn:incoming>
+      <bpmn:outgoing>Flow_11</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_ResolveFraud" name="Resolve fraud review">
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+      <bpmn:outgoing>Flow_RejectFraud</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ApproveFraud</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="Activity_NotifyReject" name="Notify customer of rejection">
+      <bpmn:incoming>Flow_RejectFraud</bpmn:incoming>
+      <bpmn:outgoing>Flow_12</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="Event_OrderRejected" name="Order rejected">
+      <bpmn:incoming>Flow_12</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_MergeFraud" name="Merge">
+      <bpmn:incoming>Flow_PassFraud</bpmn:incoming>
+      <bpmn:incoming>Flow_ApproveFraud</bpmn:incoming>
+      <bpmn:outgoing>Flow_13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Activity_ReqPay" name="Request payment authorization">
+      <bpmn:incoming>Flow_13</bpmn:incoming>
+      <bpmn:outgoing>Flow_14</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_PayResult" name="Payment authorization result">
+      <bpmn:incoming>Flow_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_PayFail</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PaySuccess</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="Activity_NotifyPayFail" name="Notify customer of payment failure">
+      <bpmn:incoming>Flow_PayFail</bpmn:incoming>
+      <bpmn:outgoing>Flow_15</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="Activity_CancelOrder" name="Cancel order">
+      <bpmn:incoming>Flow_15</bpmn:incoming>
+      <bpmn:outgoing>Flow_16</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_OrderCancelled" name="Order cancelled">
+      <bpmn:incoming>Flow_16</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_AllocLic" name="Allocate software licenses">
+      <bpmn:incoming>Flow_PaySuccess</bpmn:incoming>
+      <bpmn:outgoing>Flow_17</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_SchedAct" name="Schedule service activation">
+      <bpmn:incoming>Flow_17</bpmn:incoming>
+      <bpmn:outgoing>Flow_18</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="Activity_ConfigEnv" name="Configure customer environment">
+      <bpmn:incoming>Flow_18</bpmn:incoming>
+      <bpmn:outgoing>Flow_19</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="Activity_RunTests" name="Run automated configuration tests">
+      <bpmn:incoming>Flow_19</bpmn:incoming>
+      <bpmn:outgoing>Flow_20</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_TestEval" name="Test results evaluated">
+      <bpmn:incoming>Flow_20</bpmn:incoming>
+      <bpmn:outgoing>Flow_TestFail</bpmn:outgoing>
+      <bpmn:outgoing>Flow_TestPass</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Activity_CreateIncident" name="Create technical incident">
+      <bpmn:incoming>Flow_TestFail</bpmn:incoming>
+      <bpmn:outgoing>Flow_21</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_Escalation" name="Incident handling started">
+      <bpmn:incoming>Flow_21</bpmn:incoming>
+      <bpmn:escalationEventDefinition />
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_ActService" name="Activate customer service">
+      <bpmn:incoming>Flow_TestPass</bpmn:incoming>
+      <bpmn:outgoing>Flow_22</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_GenInv" name="Generate initial invoice">
+      <bpmn:incoming>Flow_22</bpmn:incoming>
+      <bpmn:outgoing>Flow_23</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_PostAcct" name="Post invoice to accounting">
+      <bpmn:incoming>Flow_23</bpmn:incoming>
+      <bpmn:outgoing>Flow_24</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_RevRec" name="Apply revenue recognition rules">
+      <bpmn:incoming>Flow_24</bpmn:incoming>
+      <bpmn:outgoing>Flow_25</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_LogAudit" name="Log transaction for audit">
+      <bpmn:incoming>Flow_25</bpmn:incoming>
+      <bpmn:outgoing>Flow_26</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Activity_SendConf" name="Send order confirmation">
+      <bpmn:incoming>Flow_26</bpmn:incoming>
+      <bpmn:outgoing>Flow_27</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="Activity_NotOnboard" name="Notify onboarding team">
+      <bpmn:incoming>Flow_27</bpmn:incoming>
+      <bpmn:outgoing>Flow_28</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="Activity_DelDocs" name="Deliver onboarding documentation">
+      <bpmn:incoming>Flow_28</bpmn:incoming>
+      <bpmn:outgoing>Flow_29</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="Activity_EnMonitor" name="Enable usage monitoring">
+      <bpmn:incoming>Flow_29</bpmn:incoming>
+      <bpmn:outgoing>Flow_30</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_OpenSup" name="Open customer welcome support case">
+      <bpmn:incoming>Flow_30</bpmn:incoming>
+      <bpmn:outgoing>Flow_31</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_EndAll" name="Order lifecycle completed">
+      <bpmn:incoming>Flow_31</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Activity_ValidateCust" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Activity_ValidateCust" targetRef="Activity_CheckProd" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Activity_CheckProd" targetRef="Activity_CalcPrice" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Activity_CalcPrice" targetRef="Activity_ApplyTax" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Activity_ApplyTax" targetRef="Activity_PresentQuote" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Activity_PresentQuote" targetRef="Activity_CustReview" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Activity_CustReview" targetRef="Activity_CreateSO" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Activity_CreateSO" targetRef="Activity_LinkCRM" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Activity_LinkCRM" targetRef="Activity_FraudAssess" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Activity_FraudAssess" targetRef="Gateway_FraudEval" />
+    <bpmn:sequenceFlow id="Flow_Hold" name="Risk" sourceRef="Gateway_FraudEval" targetRef="Activity_RiskReview" />
+    <bpmn:sequenceFlow id="Flow_PassFraud" name="Safe" sourceRef="Gateway_FraudEval" targetRef="Gateway_MergeFraud" />
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Activity_RiskReview" targetRef="Gateway_ResolveFraud" />
+    <bpmn:sequenceFlow id="Flow_RejectFraud" name="Rejected" sourceRef="Gateway_ResolveFraud" targetRef="Activity_NotifyReject" />
+    <bpmn:sequenceFlow id="Flow_ApproveFraud" name="Approved" sourceRef="Gateway_ResolveFraud" targetRef="Gateway_MergeFraud" />
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Activity_NotifyReject" targetRef="Event_OrderRejected" />
+    <bpmn:sequenceFlow id="Flow_13" sourceRef="Gateway_MergeFraud" targetRef="Activity_ReqPay" />
+    <bpmn:sequenceFlow id="Flow_14" sourceRef="Activity_ReqPay" targetRef="Gateway_PayResult" />
+    <bpmn:sequenceFlow id="Flow_PayFail" name="Failure" sourceRef="Gateway_PayResult" targetRef="Activity_NotifyPayFail" />
+    <bpmn:sequenceFlow id="Flow_PaySuccess" name="Authorized" sourceRef="Gateway_PayResult" targetRef="Activity_AllocLic" />
+    <bpmn:sequenceFlow id="Flow_15" sourceRef="Activity_NotifyPayFail" targetRef="Activity_CancelOrder" />
+    <bpmn:sequenceFlow id="Flow_16" sourceRef="Activity_CancelOrder" targetRef="Event_OrderCancelled" />
+    <bpmn:sequenceFlow id="Flow_17" sourceRef="Activity_AllocLic" targetRef="Activity_SchedAct" />
+    <bpmn:sequenceFlow id="Flow_18" sourceRef="Activity_SchedAct" targetRef="Activity_ConfigEnv" />
+    <bpmn:sequenceFlow id="Flow_19" sourceRef="Activity_ConfigEnv" targetRef="Activity_RunTests" />
+    <bpmn:sequenceFlow id="Flow_20" sourceRef="Activity_RunTests" targetRef="Gateway_TestEval" />
+    <bpmn:sequenceFlow id="Flow_TestFail" name="Failed" sourceRef="Gateway_TestEval" targetRef="Activity_CreateIncident" />
+    <bpmn:sequenceFlow id="Flow_TestPass" name="Passed" sourceRef="Gateway_TestEval" targetRef="Activity_ActService" />
+    <bpmn:sequenceFlow id="Flow_21" sourceRef="Activity_CreateIncident" targetRef="Event_Escalation" />
+    <bpmn:sequenceFlow id="Flow_22" sourceRef="Activity_ActService" targetRef="Activity_GenInv" />
+    <bpmn:sequenceFlow id="Flow_23" sourceRef="Activity_GenInv" targetRef="Activity_PostAcct" />
+    <bpmn:sequenceFlow id="Flow_24" sourceRef="Activity_PostAcct" targetRef="Activity_RevRec" />
+    <bpmn:sequenceFlow id="Flow_25" sourceRef="Activity_RevRec" targetRef="Activity_LogAudit" />
+    <bpmn:sequenceFlow id="Flow_26" sourceRef="Activity_LogAudit" targetRef="Activity_SendConf" />
+    <bpmn:sequenceFlow id="Flow_27" sourceRef="Activity_SendConf" targetRef="Activity_NotOnboard" />
+    <bpmn:sequenceFlow id="Flow_28" sourceRef="Activity_NotOnboard" targetRef="Activity_DelDocs" />
+    <bpmn:sequenceFlow id="Flow_29" sourceRef="Activity_DelDocs" targetRef="Activity_EnMonitor" />
+    <bpmn:sequenceFlow id="Flow_30" sourceRef="Activity_EnMonitor" targetRef="Activity_OpenSup" />
+    <bpmn:sequenceFlow id="Flow_31" sourceRef="Activity_OpenSup" targetRef="Event_EndAll" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_Order_to_Cash">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="252" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0q88l8j_di" bpmnElement="Activity_ValidateCust">
+        <dc:Bounds x="240" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0a55n31_di" bpmnElement="Activity_CheckProd">
+        <dc:Bounds x="390" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_12d456s_di" bpmnElement="Activity_CalcPrice">
+        <dc:Bounds x="540" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1h43x12_di" bpmnElement="Activity_ApplyTax">
+        <dc:Bounds x="690" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1n22s45_di" bpmnElement="Activity_PresentQuote">
+        <dc:Bounds x="840" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0f88a23_di" bpmnElement="Activity_CustReview">
+        <dc:Bounds x="990" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1m33s21_di" bpmnElement="Activity_CreateSO">
+        <dc:Bounds x="1140" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_22d45s1_di" bpmnElement="Activity_LinkCRM">
+        <dc:Bounds x="1290" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_2a88d32_di" bpmnElement="Activity_FraudAssess">
+        <dc:Bounds x="1440" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0a1122s_di" bpmnElement="Gateway_FraudEval" isMarkerVisible="true">
+        <dc:Bounds x="1590" y="245" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_22s11a2_di" bpmnElement="Activity_RiskReview">
+        <dc:Bounds x="1680" y="120" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_11s22d1_di" bpmnElement="Gateway_ResolveFraud" isMarkerVisible="true">
+        <dc:Bounds x="1830" y="135" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11d22a4_di" bpmnElement="Activity_NotifyReject">
+        <dc:Bounds x="1950" y="50" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0a221s3_di" bpmnElement="Event_OrderRejected">
+        <dc:Bounds x="2100" y="72" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_22d33f1_di" bpmnElement="Gateway_MergeFraud" isMarkerVisible="true">
+        <dc:Bounds x="1950" y="245" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_33d44g1_di" bpmnElement="Activity_ReqPay">
+        <dc:Bounds x="2050" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_33f44d2_di" bpmnElement="Gateway_PayResult" isMarkerVisible="true">
+        <dc:Bounds x="2200" y="245" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_44g55h1_di" bpmnElement="Activity_NotifyPayFail">
+        <dc:Bounds x="2280" y="400" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_44h55j2_di" bpmnElement="Activity_CancelOrder">
+        <dc:Bounds x="2430" y="400" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_44j55k3_di" bpmnElement="Event_OrderCancelled">
+        <dc:Bounds x="2580" y="422" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_55k66l1_di" bpmnElement="Activity_AllocLic">
+        <dc:Bounds x="2300" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_55l66m2_di" bpmnElement="Activity_SchedAct">
+        <dc:Bounds x="2450" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_55m66n3_di" bpmnElement="Activity_ConfigEnv">
+        <dc:Bounds x="2600" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_66n77o1_di" bpmnElement="Activity_RunTests">
+        <dc:Bounds x="2750" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_66o77p2_di" bpmnElement="Gateway_TestEval" isMarkerVisible="true">
+        <dc:Bounds x="2900" y="245" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_66p77q3_di" bpmnElement="Activity_CreateIncident">
+        <dc:Bounds x="3000" y="120" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_66q77r4_di" bpmnElement="Event_Escalation">
+        <dc:Bounds x="3150" y="142" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_77r88s1_di" bpmnElement="Activity_ActService">
+        <dc:Bounds x="3000" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_77s88t2_di" bpmnElement="Activity_GenInv">
+        <dc:Bounds x="3150" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_77t88u3_di" bpmnElement="Activity_PostAcct">
+        <dc:Bounds x="3300" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_88u99v1_di" bpmnElement="Activity_RevRec">
+        <dc:Bounds x="3450" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_88v99w2_di" bpmnElement="Activity_LogAudit">
+        <dc:Bounds x="3600" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_88w99x3_di" bpmnElement="Activity_SendConf">
+        <dc:Bounds x="3750" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_99x00y1_di" bpmnElement="Activity_NotOnboard">
+        <dc:Bounds x="3900" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_99y00z2_di" bpmnElement="Activity_DelDocs">
+        <dc:Bounds x="4050" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00z11a3_di" bpmnElement="Activity_EnMonitor">
+        <dc:Bounds x="4200" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11a22b4_di" bpmnElement="Activity_OpenSup">
+        <dc:Bounds x="4350" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_11b22c5_di" bpmnElement="Event_EndAll">
+        <dc:Bounds x="4500" y="252" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="188" y="270" />
+        <di:waypoint x="240" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="340" y="270" />
+        <di:waypoint x="390" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="490" y="270" />
+        <di:waypoint x="540" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="640" y="270" />
+        <di:waypoint x="690" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="790" y="270" />
+        <di:waypoint x="840" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="940" y="270" />
+        <di:waypoint x="990" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1090" y="270" />
+        <di:waypoint x="1140" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="1240" y="270" />
+        <di:waypoint x="1290" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="1390" y="270" />
+        <di:waypoint x="1440" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
+        <di:waypoint x="1540" y="270" />
+        <di:waypoint x="1590" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Hold_di" bpmnElement="Flow_Hold">
+        <di:waypoint x="1615" y="245" />
+        <di:waypoint x="1615" y="160" />
+        <di:waypoint x="1680" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PassFraud_di" bpmnElement="Flow_PassFraud">
+        <di:waypoint x="1640" y="270" />
+        <di:waypoint x="1950" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
+        <di:waypoint x="1780" y="160" />
+        <di:waypoint x="1830" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RejectFraud_di" bpmnElement="Flow_RejectFraud">
+        <di:waypoint x="1855" y="135" />
+        <di:waypoint x="1855" y="90" />
+        <di:waypoint x="1950" y="90" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ApproveFraud_di" bpmnElement="Flow_ApproveFraud">
+        <di:waypoint x="1880" y="160" />
+        <di:waypoint x="1975" y="160" />
+        <di:waypoint x="1975" y="245" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12">
+        <di:waypoint x="2050" y="90" />
+        <di:waypoint x="2100" y="90" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13">
+        <di:waypoint x="2000" y="270" />
+        <di:waypoint x="2050" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14">
+        <di:waypoint x="2150" y="270" />
+        <di:waypoint x="2200" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PayFail_di" bpmnElement="Flow_PayFail">
+        <di:waypoint x="2225" y="295" />
+        <di:waypoint x="2225" y="440" />
+        <di:waypoint x="2280" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PaySuccess_di" bpmnElement="Flow_PaySuccess">
+        <di:waypoint x="2250" y="270" />
+        <di:waypoint x="2300" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15">
+        <di:waypoint x="2380" y="440" />
+        <di:waypoint x="2430" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16">
+        <di:waypoint x="2530" y="440" />
+        <di:waypoint x="2580" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17">
+        <di:waypoint x="2400" y="270" />
+        <di:waypoint x="2450" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_di" bpmnElement="Flow_18">
+        <di:waypoint x="2550" y="270" />
+        <di:waypoint x="2600" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_di" bpmnElement="Flow_19">
+        <di:waypoint x="2700" y="270" />
+        <di:waypoint x="2750" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_di" bpmnElement="Flow_20">
+        <di:waypoint x="2850" y="270" />
+        <di:waypoint x="2900" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_TestFail_di" bpmnElement="Flow_TestFail">
+        <di:waypoint x="2925" y="245" />
+        <di:waypoint x="2925" y="160" />
+        <di:waypoint x="3000" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_TestPass_di" bpmnElement="Flow_TestPass">
+        <di:waypoint x="2950" y="270" />
+        <di:waypoint x="3000" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_21_di" bpmnElement="Flow_21">
+        <di:waypoint x="3100" y="160" />
+        <di:waypoint x="3150" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_22_di" bpmnElement="Flow_22">
+        <di:waypoint x="3100" y="270" />
+        <di:waypoint x="3150" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_23_di" bpmnElement="Flow_23">
+        <di:waypoint x="3250" y="270" />
+        <di:waypoint x="3300" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_24_di" bpmnElement="Flow_24">
+        <di:waypoint x="3400" y="270" />
+        <di:waypoint x="3450" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_25_di" bpmnElement="Flow_25">
+        <di:waypoint x="3550" y="270" />
+        <di:waypoint x="3600" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_26_di" bpmnElement="Flow_26">
+        <di:waypoint x="3700" y="270" />
+        <di:waypoint x="3750" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_27_di" bpmnElement="Flow_27">
+        <di:waypoint x="3850" y="270" />
+        <di:waypoint x="3900" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_28_di" bpmnElement="Flow_28">
+        <di:waypoint x="4000" y="270" />
+        <di:waypoint x="4050" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_29_di" bpmnElement="Flow_29">
+        <di:waypoint x="4150" y="270" />
+        <di:waypoint x="4200" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_30_di" bpmnElement="Flow_30">
+        <di:waypoint x="4300" y="270" />
+        <di:waypoint x="4350" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_31_di" bpmnElement="Flow_31">
+        <di:waypoint x="4450" y="270" />
+        <di:waypoint x="4500" y="270" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

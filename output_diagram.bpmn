@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_Refund_Request" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_1" name="Refund Requested">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_ReviewRequest" name="Review Request">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_CheckAmount" name="Check Amount">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_Under50</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Over50</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_ManagerApproval" name="Manager Approval">
+      <bpmn:incoming>Flow_Over50</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_Join">
+      <bpmn:incoming>Flow_Under50</bpmn:incoming>
+      <bpmn:incoming>Flow_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToPayment</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_ProcessPayment" name="Process Payment">
+      <bpmn:incoming>Flow_ToPayment</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToNotify</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Task_NotifyCustomer" name="Notify Customer">
+      <bpmn:incoming>Flow_ToNotify</bpmn:incoming>
+      <bpmn:outgoing>Flow_End</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent_1" name="Refund Processed">
+      <bpmn:incoming>Flow_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_ReviewRequest"/>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_ReviewRequest" targetRef="Gateway_CheckAmount"/>
+    <bpmn:sequenceFlow id="Flow_Under50" name="Under $50" sourceRef="Gateway_CheckAmount" targetRef="Gateway_Join"/>
+    <bpmn:sequenceFlow id="Flow_Over50" name="Over $50" sourceRef="Gateway_CheckAmount" targetRef="Task_ManagerApproval"/>
+    <bpmn:sequenceFlow id="Flow_Approved" sourceRef="Task_ManagerApproval" targetRef="Gateway_Join"/>
+    <bpmn:sequenceFlow id="Flow_ToPayment" sourceRef="Gateway_Join" targetRef="Task_ProcessPayment"/>
+    <bpmn:sequenceFlow id="Flow_ToNotify" sourceRef="Task_ProcessPayment" targetRef="Task_NotifyCustomer"/>
+    <bpmn:sequenceFlow id="Flow_End" sourceRef="Task_NotifyCustomer" targetRef="EndEvent_1"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_Refund_Request">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="102" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="131" y="145" width="79" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_ReviewRequest_di" bpmnElement="Task_ReviewRequest">
+        <dc:Bounds x="240" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_CheckAmount_di" bpmnElement="Gateway_CheckAmount" isMarkerVisible="true">
+        <dc:Bounds x="395" y="95" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="384" y="65" width="73" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_ManagerApproval_di" bpmnElement="Task_ManagerApproval">
+        <dc:Bounds x="490" y="210" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Join_di" bpmnElement="Gateway_Join" isMarkerVisible="true">
+        <dc:Bounds x="645" y="95" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_ProcessPayment_di" bpmnElement="Task_ProcessPayment">
+        <dc:Bounds x="750" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_NotifyCustomer_di" bpmnElement="Task_NotifyCustomer">
+        <dc:Bounds x="910" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_End_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="1072" y="102" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1046" y="145" width="89" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="188" y="120"/>
+        <di:waypoint x="240" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="340" y="120"/>
+        <di:waypoint x="395" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Under50_di" bpmnElement="Flow_Under50">
+        <di:waypoint x="445" y="120"/>
+        <di:waypoint x="645" y="120"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="509" y="102" width="50" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Over50_di" bpmnElement="Flow_Over50">
+        <di:waypoint x="420" y="145"/>
+        <di:waypoint x="420" y="250"/>
+        <di:waypoint x="490" y="250"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="426" y="193" width="44" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Approved_di" bpmnElement="Flow_Approved">
+        <di:waypoint x="590" y="250"/>
+        <di:waypoint x="670" y="250"/>
+        <di:waypoint x="670" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToPayment_di" bpmnElement="Flow_ToPayment">
+        <di:waypoint x="695" y="120"/>
+        <di:waypoint x="750" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToNotify_di" bpmnElement="Flow_ToNotify">
+        <di:waypoint x="850" y="120"/>
+        <di:waypoint x="910" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_End_di" bpmnElement="Flow_End">
+        <di:waypoint x="1010" y="120"/>
+        <di:waypoint x="1072" y="120"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

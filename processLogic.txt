@@ -1,0 +1,442 @@
+Here is a chronological list of process steps identified from the provided document, with technical annotations:
+
+**I. General Process for Placing Products on the Market and Commencement of Use (Based on 4. člen)**
+
+1.  **Actor:** Product Manufacturer (Proizvajalec)
+    **Action Type:** Service Task
+    **Flow:** Ensures products are compliant with technical safety, health, and environmental requirements, and their technical status and identity are confirmed through a prescribed procedure. (This implies a series of internal and external checks).
+    *(Opomba: This is a high-level, overarching responsibility, not a single step, but it sets the stage for the detailed processes below.)*
+
+**II. Procedures for Determining Compliance (Based on 6. člen)**
+
+This section outlines various procedures for compliance, performed by different actors.
+
+**A. Vehicle Homologation Process (Based on 11., 12., 13. člen, and 6. člen (2))**
+
+1.  **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** User Task
+    **Flow:** Submits an application for type homologation for each product type. (11. člen (3))
+2.  **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** User Task
+    **Flow:** Provides complete and truthful data in the homologation procedure. (11. člen (4))
+3.  **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Service Task
+    **Flow:** Performs homologation procedures (for vehicles, vehicle parts, and non-original/non-homologated parts/equipment). (6. člen (2))
+4.  **Actor:** Technical Service (Tehnična služba) OR Homologation Body (Homologacijski organ)
+    **Action Type:** Service Task
+    **Flow:** Performs testing, verification, and control tasks for products if authorized. (6. člen (2))
+5.  **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Gateway
+    **Flow:** Determines if the product type meets prescribed requirements. (11. člen (1), 12. člen (2))
+    *   **If Yes:** Proceeds to grant homologation and issue certificate.
+    *   **If No:** Proceeds to reject homologation.
+6.  **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Service Task
+    **Flow:** Grants homologation and issues a certificate of homologation. (11. člen (1))
+7.  **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Gateway (Decision)
+    **Flow:** Assesses if the vehicle, despite meeting requirements, poses a serious danger to road traffic, environment, or health. (12. člen (3))
+    *   **If Yes (Serious Danger):** Proceeds to reject the granting of homologation.
+    *   **If No (No Serious Danger):** Homologation is granted.
+8.  **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** Service Task
+    **Flow:** Attaches a certificate of conformity to each vehicle of a homologated type, guaranteeing its compliance. (13. člen (2))
+9.  **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** Service Task
+    **Flow:** Enables the homologation body to carry out supervision of homologated product types. (13. člen (1))
+10. **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Gateway (Check)
+    **Flow:** Supervises homologated types to ensure products comply with the homologated type. (13. člen (3))
+    *   **If Non-compliant or Fraudulent Test Results:** Proceeds to order harmonization.
+    *   **If Compliant:** Continues regular supervision.
+11. **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Service Task
+    **Flow:** Orders the manufacturer to harmonize production and sets a deadline for rectifying identified faults. (13. člen (3))
+12. **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Gateway (Check)
+    **Flow:** Checks if the manufacturer rectifies faults within the given deadline. (13. člen (3))
+    *   **If No (Faults not rectified):** Proceeds to revoke homologation.
+    *   **If Yes (Faults rectified):** Continues supervision.
+13. **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** Gateway (Event-based decision)
+    **Flow:** If a serious danger to road traffic, environment, or health is identified in a series of homologated products (recall procedure). (12. člen (4))
+    *   **If Serious Danger Identified:** Proceeds to inform homologation body and submit planned corrective measures.
+14. **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** User Task
+    **Flow:** Immediately informs the homologation body and submits a description of planned corrective measures. (12. člen (4))
+15. **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Service Task
+    **Flow:** Reviews planned corrective measures. (12. člen (5))
+16. **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Gateway (Decision)
+    **Flow:** Orders additional or different corrective measures if necessary. (12. člen (5))
+    *   **If Additional Measures Ordered:** Proceeds to manufacturer implements measures.
+    *   **If No Additional Measures Ordered:** Proceeds to manufacturer implements original measures.
+17. **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** Gateway (Check)
+    **Flow:** Implements ordered corrective measures. (12. člen (5))
+    *   **If No (Measures not implemented):** Proceeds to homologation body revokes homologation.
+    *   **If Yes (Measures implemented):** Continues (vehicle recall successful).
+18. **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** At manufacturer's request, enables implementation of corrective measures on the vehicle within the prescribed period. (12. člen (6))
+19. **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** User Task
+    **Flow:** Notifies the homologation body of the definitive cessation of production of a homologated product. (15. člen (3))
+20. **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** User Task
+    **Flow:** Informs the homologation body about all changes to data included in the documentation of the homologated product type. (15. člen (1))
+21. **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Service Task
+    **Flow:** Decides on requests for changes or additions to the homologation related to its original decisions. (15. člen (2))
+
+**B. Individual Vehicle Approval Process (Based on 16., 17., 18., 19. člen, and 6. člen (4))**
+
+1.  **Actor:** Manufacturer (Proizvajalec) OR Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Submits an application for individual vehicle approval for each vehicle. (16. člen (2))
+    *(Trigger conditions for this process are in 17. člen (1) and 18. člen (1) - e.g., non-homologated type, used imported vehicle, modified vehicle.)*
+2.  **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Service Task
+    **Flow:** Performs individual vehicle approval (for general/special requirements, modified vehicles). (6. člen (2) & (3))
+3.  **Actor:** Technical Service (Tehnična služba)
+    **Action Type:** Service Task
+    **Flow:** Performs individual approval for modified vehicles. (6. člen (3))
+4.  **Actor:** Homologation Body (Homologacijski organ) OR Technical Service (Tehnična služba)
+    **Action Type:** Gateway (Check)
+    **Flow:** Determines if the inspected individual vehicle meets the prescribed requirements and submitted documentation. (16. člen (1), 19. člen (2) & (3))
+    *   **If Yes:** Proceeds to issue certificate.
+    *   **If No:** Proceeds to reject individual approval.
+5.  **Actor:** Homologation Body (Homologacijski organ)
+    **Action Type:** Service Task
+    **Flow:** Issues a certificate of individual vehicle approval. (16. člen (1), 19. člen (2))
+6.  **Actor:** Technical Service (Tehnična služba)
+    **Action Type:** Service Task
+    **Flow:** Based on the certificate, issues an additional certificate of conformity for vehicle registration. (16. člen (1))
+7.  **Actor:** Homologation Body (Homologacijski organ) OR Technical Service (Tehnična služba)
+    **Action Type:** Gateway (Decision)
+    **Flow:** Assesses if the vehicle, despite meeting requirements, poses a serious danger to road traffic, environment, or health. (19. člen (4))
+    *   **If Yes (Serious Danger):** Proceeds to reject individual vehicle approval.
+    *   **If No (No Serious Danger):** Individual approval is granted.
+8.  **Actor:** Technical Service (Tehnična služba)
+    **Action Type:** Gateway (Check)
+    **Flow:** Checks if the vehicle has an identification number. (19. člen (5))
+    *   **If No (No identification number for specific cases):** Proceeds to determine and imprint a national identification number.
+    *   **If Yes:** Proceeds.
+9.  **Actor:** Technical Service (Tehnična služba)
+    **Action Type:** Service Task
+    **Flow:** Determines a national identification number for the vehicle, imprints it, and notifies the homologation body. (19. člen (5))
+10. **Actor:** Technical Service (Tehnična služba)
+    **Action Type:** Gateway (Check)
+    **Flow:** Checks identification number for modified/repaired vehicles (if missing, damaged, or forged). (19. člen (6))
+    *   **If original number can be determined:** Proceeds to imprint original identification number.
+    *   **If original number cannot be determined:** Proceeds to reject application for individual approval.
+
+**C. Identification and Technical Condition Assessment Process (Based on 21., 22., 23., 24. člen, and 6. člen (4))**
+
+1.  **Actor:** Physical or Legal Person (Fizična ali pravna oseba)
+    **Action Type:** User Task
+    **Flow:** Submits an application to a professional organization for identification and technical condition assessment of a vehicle. (22. člen (1), (2), (4), 23. člen (1), 24. člen (1))
+    *(Trigger conditions for this process are in 22. člen (1), (2), (4) and 23. člen (1), 24. člen (1) - e.g., new vehicle without certificate of conformity, first registration of imported vehicle, specific special cases, historic vehicles.)*
+2.  **Actor:** Professional Organization (Strokovna organizacija)
+    **Action Type:** Service Task
+    **Flow:** Performs identification and technical condition assessment of the vehicle. (6. člen (4), 21. člen (2))
+3.  **Actor:** Professional Organization (Strokovna organizacija)
+    **Action Type:** Gateway (Check)
+    **Flow:** Determines vehicle identity, collects technical data, and assesses integrity/safety. (21. člen (2))
+    *   **If Compliant:** Proceeds to issue consent to registration.
+    *   **If Non-compliant:** Further action (e.g., rejection or requirement for rectification, not explicitly detailed as a direct flow step for non-compliance, but implied by the purpose).
+4.  **Actor:** Professional Organization (Strokovna organizacija)
+    **Action Type:** Service Task
+    **Flow:** Issues consent to registration (on a certificate of conformity form for individually approved vehicles). (21. člen (2))
+5.  **Actor:** Physical or Legal Person (Fizična ali pravna oseba)
+    **Action Type:** User Task
+    **Flow:** For historic vehicles, attaches a classification report from FIVA. (24. člen (1))
+6.  **Actor:** Professional Organization (Strokovna organizacija)
+    **Action Type:** Gateway (Check)
+    **Flow:** Classifies the vehicle as a historic vehicle if it meets the criteria after identification. (24. člen (1))
+    *   **If Yes (Meets criteria):** Vehicle is classified as historic.
+    *   **If No (Does not meet criteria):** Vehicle is not classified as historic.
+
+**III. Vehicle Registration Process (Based on 27., 28., 29., 30., 31., 32., 34., 35. člen)**
+
+1.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Submits an application for vehicle registration. (30. člen (1))
+2.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Attaches required evidence to the application (proof of origin/ownership, certificate of conformity or consent to registration, mandatory insurance, annual road usage fee, technical inspection certificate). (30. člen (1))
+3.  **Actor:** Registration Organization (Registracijska organizacija) OR Administrative Unit (Upravna enota) OR Ministry responsible for internal affairs (Ministrstvo, pristojno za notranje zadeve) OR Ministry responsible for defense (Ministrstvo, pristojno za obrambo)
+    **Action Type:** Gateway (Check based on vehicle type/owner)
+    **Flow:** Determines competent body for registration. (29. člen (1) - (4))
+    *   **If standard vehicle:** Registration Organization.
+    *   **If diplomatic/international organization:** Administrative Unit.
+    *   **If police vehicle:** Ministry of Internal Affairs.
+    *   **If military vehicle:** Ministry of Defense.
+4.  **Actor:** Competent Registration Body (from step 3)
+    **Action Type:** Gateway (Check)
+    **Flow:** Reviews the application and attached documents. (30. člen (4))
+    *   **If Homologation Body notifies serious danger:** Proceeds to reject registration.
+    *   **If all conditions met:** Proceeds to register vehicle.
+5.  **Actor:** Competent Registration Body (from step 3)
+    **Action Type:** Service Task
+    **Flow:** Registers the vehicle by entering data (registration mark, vehicle data, owner data) into the register of registered vehicles. (27. člen (1), 30. člen (1))
+6.  **Actor:** Competent Registration Body (from step 3)
+    **Action Type:** Service Task
+    **Flow:** Issues a traffic permit and prescribed number of registration plates. (31. člen (1), 32. člen (1))
+    *(Special cases for police/military may involve multiple permits/plates - 31. člen (2)-(4).)*
+7.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** Optional User Task
+    **Flow:** Can request a custom registration plate mark. (34. člen (1))
+    *   **If requested:** Competent Registration Body issues custom plate.
+8.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Reports any change of data in the traffic permit (e.g., technical changes, ownership, residence/seat) to the registration organization within 15 days, attaching supporting documents. (32. člen (3))
+9.  **Actor:** Registration Organization (Registracijska organizacija)
+    **Action Type:** Gateway (Check for change of ownership)
+    **Flow:** If ownership change is due to a legal transaction between physical persons or physical/legal person, establishes identity of physical persons and records personal document details. (32. člen (4))
+10. **Actor:** Registration Organization (Registracijska organizacija) OR Ministry (Ministrstvo)
+    **Action Type:** Service Task
+    **Flow:** Extends the validity of the traffic permit. (32. člen (1))
+    *   **If online extension:** New permit delivered by mail. (32. člen (2))
+11. **Actor:** Owner (Lastnik)
+    **Action Type:** User Task
+    **Flow:** Collects the new traffic permit (if online extension). (32. člen (2))
+12. **Actor:** Owner (Lastnik)
+    **Action Type:** Gateway (Check)
+    **Flow:** Checks if the owner collects the new traffic permit within 15 days. (32. člen (2))
+    *   **If No (Not collected):** Proceeds to Administrative Unit returns the permit.
+    *   **If Yes (Collected):** Process complete.
+13. **Actor:** Administrative Unit (Upravna enota)
+    **Action Type:** Service Task
+    **Flow:** Returns the uncollected traffic permit. (32. člen (2))
+
+**IV. Vehicle Deregistration Process (Based on 39., 40. člen)**
+
+1.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Decides to deregister vehicle (either voluntarily or due to mandatory conditions). (39. člen (1), (2))
+    *   **If voluntary:** Proceeds to deregister and hand over plates.
+    *   **If mandatory (e.g., destroyed, alienated, stolen, permit expired > 30 days):** Proceeds to deregister and hand over plates within 15 days.
+2.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Deregisters the vehicle at the registration organization. (39. člen (1), (2))
+3.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** Gateway (Check for plates)
+    **Flow:** Hands over registration plates to the registration organization, unless exceptions apply (lost, stolen, custom plates, immediate re-registration). (39. člen (1), (2), (4))
+    *   **If hand over required:** Proceeds to hand over plates.
+    *   **If hand over not required:** Proceeds.
+4.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** (For end-of-life vehicles) Submits a certificate of destruction. (40. člen)
+5.  **Actor:** Registration Organization (Registracijska organizacija)
+    **Action Type:** Service Task
+    **Flow:** Enters deregistration data and (for end-of-life vehicles) destruction data into the register of registered vehicles. (40. člen)
+6.  **Actor:** Registration Organization (Registracijska organizacija)
+    **Action Type:** Service Task
+    **Flow:** Stores handed-over registration plates for 30 days (or one year for specific vehicle types). (39. člen (7))
+7.  **Actor:** Registration Organization (Registracijska organizacija)
+    **Action Type:** Gateway (Check for re-registration)
+    **Flow:** Checks if the same vehicle is re-registered with the plates within the storage period. (39. člen (7))
+    *   **If Yes:** Plates are re-used.
+    *   **If No:** Plates are destroyed.
+8.  **Actor:** Registration Organization (Registracijska organizacija)
+    **Action Type:** Service Task
+    **Flow:** Destroys registration plates (if not re-registered). (39. člen (7))
+9.  **Actor:** Administrative Unit (Upravna enota)
+    **Action Type:** Gateway (Check for owner's compliance in case of change of ownership and fee payment)
+    **Flow:** If new owner fails to register a vehicle within 15 days after ownership change, sends a written warning to the owner. (39. člen (6))
+10. **Actor:** Administrative Unit (Upravna enota)
+    **Action Type:** Gateway (Check for owner's compliance after warning)
+    **Flow:** If the owner does not fulfill obligations within 15 days after the warning. (39. člen (8))
+    *   **If Yes (Not fulfilled):** Proceeds to deregister vehicle ex officio.
+    *   **If No (Fulfilled):** Process ends.
+11. **Actor:** Administrative Unit (Upravna enota)
+    **Action Type:** Service Task
+    **Flow:** Deregisters the vehicle ex officio in the register of registered vehicles. (39. člen (8))
+
+**V. Technical Inspection Process (Based on 41., 47., 48., 50., 51. člen)**
+
+1.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Ensures vehicles are presented for technical inspection within prescribed deadlines (e.g., one year after first registration, four years for others, five years for mopeds, four years after purchase for light trailers). (48. člen (1), 49. člen (1))
+    *(Special conditions for certain vehicles requiring inspection every six months - 49. člen (4).)*
+2.  **Actor:** Professional Organization (Strokovna organizacija)
+    **Action Type:** Service Task
+    **Flow:** Performs technical inspection of the vehicle in accordance with regulations, using calibrated measuring devices and equipment. (47. člen, 50. člen (1), (2))
+3.  **Actor:** Professional Organization (Strokovna organizacija)
+    **Action Type:** Gateway (Check)
+    **Flow:** Determines if the vehicle is technically sound. (50. člen (3))
+    *   **If Yes (Technically Sound):** Proceeds to issue certificate.
+    *   **If No (Not Technically Sound):** Proceeds (owner rectifies faults, then re-inspection).
+4.  **Actor:** Professional Organization (Strokovna organizacija)
+    **Action Type:** Service Task
+    **Flow:** Issues a certificate of technical inspection, indicating the deadline for the next inspection. (50. člen (3))
+5.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Pays the costs of the technical inspection. (50. člen (4))
+6.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** Gateway (Check for modifications/changes during inspection)
+    **Flow:** If modifications/changes are found during the technical inspection that affect the data in the traffic permit. (51. člen (1))
+    *   **If Yes (Modifications/changes found):** Proceeds to require individual vehicle approval for modifications.
+    *   **If No (No modifications/changes):** Technical inspection process completed.
+7.  **Actor:** Technical Service (Tehnična služba)
+    **Action Type:** Service Task
+    **Flow:** Performs individual vehicle approval for modifications/changes and records them in the certificate of conformity or consent to registration. (51. člen (1))
+8.  **Actor:** Professional Organization (Strokovna organizacija)
+    **Action Type:** Service Task
+    **Flow:** Issues a certificate of technical inspection *only after* individual vehicle approval for modifications/changes. (51. člen (1))
+
+**VI. Vehicle Changes/Modifications Registration (Based on 52. člen)**
+
+1.  **Actor:** Vehicle Owner (Lastnik vozila)
+    **Action Type:** User Task
+    **Flow:** Ensures changes made to the vehicle after homologation or individual approval (not major modifications per 18. člen) are registered with the technical service within 15 days. (52. člen (1))
+2.  **Actor:** Installer (Izvajalec vgradnje)
+    **Action Type:** Service Task
+    **Flow:** (For specific non-modification changes like exhaust systems, tow balls, spoilers, wheels) Issues a certificate of the performed installation. (52. člen (3))
+3.  **Actor:** Technical Service (Tehnična služba)
+    **Action Type:** Service Task
+    **Flow:** Registers the changes in the vehicle's documentation. (52. člen (1))
+
+**VII. Professional Supervision and Inspections (Based on 67., 68., 70., 71., 72., 73., 74., 75., 76., 77. člen)**
+
+**A. Agency Professional Supervision**
+
+1.  **Actor:** Authorized Person of the Agency (Pooblaščena oseba agencije)
+    **Action Type:** Service Task
+    **Flow:** Performs professional supervision over manufacturers, technical services, professional organizations, authorized registration organizations, and training organizations. (67. člen (1))
+2.  **Actor:** Authorized Person of the Agency (Pooblaščena oseba agencije)
+    **Action Type:** Service Task
+    **Flow:** Inspects documentation, observes procedures, accesses video surveillance, conducts re-inspections, brings vehicles as customers, analyzes results, analyzes task performance. (67. člen (2))
+3.  **Actor:** Authorized Person of the Agency (Pooblaščena oseba agencije)
+    **Action Type:** Gateway (Check)
+    **Flow:** Identifies irregularities during supervision. (67. člen (2))
+    *   **If Irregularities Found:** Proceeds to orally prohibit work until rectified.
+    *   **If No Irregularities Found:** Supervision continues.
+4.  **Actor:** Authorized Person of the Agency (Pooblaščena oseba agencije)
+    **Action Type:** Service Task
+    **Flow:** Orally prohibits work until irregularities are rectified. (67. člen (2))
+5.  **Actor:** Agency (Agencija)
+    **Action Type:** Service Task
+    **Flow:** Reports to the ministry on the performance of tasks. (67. člen (3))
+
+**B. Inspectorate Supervision (General)**
+
+1.  **Actor:** Inspectors (Inšpektorji)
+    **Action Type:** Service Task
+    **Flow:** Supervises the implementation of the law and regulations. (68. člen (1))
+2.  **Actor:** Inspector (Inšpektor)
+    **Action Type:** Service Task
+    **Flow:** Inspects records, obtains personal and other data, prohibits placing on market/use of non-compliant products, obtains data on technical protection, obtains document copies. (70. člen (1))
+3.  **Actor:** Inspector (Inšpektor)
+    **Action Type:** Gateway (Check)
+    **Flow:** Identifies violations of the law. (71. člen)
+    *   **If Violations Found:** Proceeds to order measures for rectification, prohibit work, prohibit person from working, or order re-inspection.
+    *   **If No Violations Found:** Supervision continues.
+4.  **Actor:** Inspector (Inšpektor)
+    **Action Type:** Service Task
+    **Flow:** Orders measures for rectification, temporarily prohibits work, prohibits a person from performing work, or performs/orders a re-inspection of the vehicle. (71. člen)
+
+**C. Inspectorate Supervision (Professional Organizations)**
+
+1.  **Actor:** Inspector (Inšpektor)
+    **Action Type:** Service Task
+    **Flow:** Orders a repeat of performed identification, technical condition assessment, or technical soundness verification. (72. člen (1))
+2.  **Actor:** Inspector (Inšpektor)
+    **Action Type:** Gateway (Check after repeat procedure)
+    **Flow:** If the repeat procedure finds that the original service issued consent/certificate for a non-compliant vehicle. (72. člen (4))
+    *   **If Yes (Non-compliant):** Professional organization pays costs.
+    *   **If No (Compliant):** Inspectorate pays costs.
+3.  **Actor:** Inspector (Inšpektor)
+    **Action Type:** Service Task
+    **Flow:** Informs the agency about irregularities found during repeat procedures. (72. člen (5))
+
+**D. Inspectorate Supervision (Road Traffic) / Mobile Units**
+
+1.  **Actor:** Inspector (Inšpektor)
+    **Action Type:** Service Task
+    **Flow:** Stops and inspects vehicles, devices, equipment, and documents in road traffic, including using mobile units. (73. člen (1), 75. člen (1))
+2.  **Actor:** Driver (Voznik)
+    **Action Type:** User Task
+    **Flow:** Stops the vehicle at the designated location and cooperates with the inspection. (73. člen (2), 77. člen (1))
+3.  **Actor:** Driver (Voznik)
+    **Action Type:** Gateway (Check)
+    **Flow:** If non-compliance leading to vehicle exclusion is found during roadside check. (73. člen (3))
+    *   **If Non-compliant:** Driver pays inspection costs.
+    *   **If Compliant:** No costs.
+4.  **Actor:** Inspector (Inšpektor)
+    **Action Type:** Gateway (Suspicion of non-compliance)
+    **Flow:** If suspecting non-compliance (e.g., technical unsoundness, emissions, damage, modifications), orders an extraordinary technical inspection. (76. člen (3))
+    *   **If Suspected:** Proceeds to order extraordinary technical inspection.
+5.  **Actor:** Driver (Voznik)
+    **Action Type:** User Task
+    **Flow:** (If on-site inspection not possible) Drives the vehicle to a technical inspection at the inspector's or police officer's request and cooperates. (77. člen (2))
+6.  **Actor:** Driver (Voznik)
+    **Action Type:** Gateway (Refusal to drive for inspection)
+    **Flow:** If the driver refuses to drive the vehicle for technical inspection. (77. člen (3))
+    *   **If Refuses:** Vehicle is taken for inspection at driver's expense.
+7.  **Actor:** Driver (Voznik)
+    **Action Type:** Gateway (Technical soundness check after forced inspection)
+    **Flow:** If the vehicle is found not technically sound after forced inspection. (77. člen (3))
+    *   **If Not Technically Sound:** Driver pays inspection costs.
+8.  **Actor:** Inspector (Inšpektor) OR Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Excludes vehicle from traffic or prohibits use if non-compliant, damaged, or modified improperly. (76. člen (1))
+9.  **Actor:** Inspector (Inšpektor) OR Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Confiscates traffic permit and/or registration plates. (76. člen (2), (3))
+10. **Actor:** Inspector (Inšpektor) OR Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Issues a certificate of confiscation for the traffic permit and registration plates. (76. člen (2))
+11. **Actor:** Inspector (Inšpektor) OR Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Returns confiscated traffic permit and plates to owner/user within 5 working days if reasons for confiscation are rectified and costs paid. (76. člen (5))
+12. **Actor:** Inspector (Inšpektor) OR Police Officer (Policist)
+    **Action Type:** Gateway (Check for return period)
+    **Flow:** If traffic permit and plates are not returned to owner/user within 5 working days. (76. člen (5))
+    *   **If Not Returned:** Proceeds to send to administrative unit.
+    *   **If Returned:** Process complete.
+13. **Actor:** Inspector (Inšpektor) OR Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Sends the traffic permit and registration plates to the administrative unit (after 5 days). (76. člen (5))
+14. **Actor:** Inspector (Inšpektor) OR Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Destroys confiscated test plates. (76. člen (5))
+
+**E. Police Supervision**
+
+1.  **Actor:** Police (Policija)
+    **Action Type:** Service Task
+    **Flow:** Supervises the implementation of the law in road traffic and safety elements on tractors. (74. člen (1))
+2.  **Actor:** Police Officer (Policist)
+    **Action Type:** Gateway (Check for modified vehicles)
+    **Flow:** If a vehicle is modified beyond maximum power/speed or without approval. (74. člen (2))
+    *   **If Modified:** Proceeds to seize the vehicle.
+3.  **Actor:** Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Seizes the modified vehicle. (74. člen (2))
+4.  **Actor:** Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Confiscates registration plates and sends them to the administrative unit. (74. člen (4))
+5.  **Actor:** Police Officer (Policist)
+    **Action Type:** Service Task
+    **Flow:** Hands over the seized vehicle to the court or stores it. (74. člen (3))
+6.  **Actor:** Administrative Unit (Upravna enota)
+    **Action Type:** Service Task
+    **Flow:** Enters data about the seized vehicle into the register of registered vehicles. (74. člen (4))
+7.  **Actor:** Administrative Unit (Upravna enota)
+    **Action Type:** Service Task
+    **Flow:** Deletes the seizure entry upon return of the vehicle to the owner. (74. člen (4))
+8.  **Actor:** Police (Policija)
+    **Action Type:** Service Task
+    **Flow:** Reports to the ministry on roadside inspections of commercial vehicles' technical soundness. (74. člen (5))
+
+**VIII. Access to Repair and Maintenance Information (Based on 81. člen)**
+
+1.  **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** Service Task
+    **Flow:** Enables unrestricted access to repair and maintenance information for interested legal entities/sole proprietors registered for vehicle maintenance and repair, against reimbursement of costs. (81. člen (2))
+2.  **Actor:** Manufacturer (Proizvajalec)
+    **Action Type:** Service Task
+    **Flow:** Provides a standardized and secure remote support device, if necessary, to enable interventions requiring access to the vehicle's security system. (81. člen (3))
