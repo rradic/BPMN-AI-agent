@@ -5,13 +5,20 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "agent.ts",
+  "main": "server.ts",
   "scripts": {
+    "start": "npx tsx server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "fs": "^0.0.1-security"
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "multer": "^1.4.5-lts.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "tsx": "^4.19.0"
+  }
 }

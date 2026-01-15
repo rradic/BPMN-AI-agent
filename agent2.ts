@@ -2,54 +2,72 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import * as fs from 'fs';
 
-const API_KEY = process.env.GEMINI_API_KEY;
+const API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyCvqvBIFscgo9xlWCHe_dkVjq0W8sl0Ulk';
 const genAI = new GoogleGenerativeAI(API_KEY);
 const fileManager = new GoogleAIFileManager(API_KEY);
 
-async function analyzeProcessDocument(pdfPath: string) {
-    // 1. Upload the PDF to the File API
-    console.log("📤 Reading process document...");
+export interface ProcessAnalysisResponse {
+    decision: string;
+    explanation: string;
+}
+
+export async function analyzeProcessDocument(pdfPath: string): Promise<ProcessAnalysisResponse> {
     const uploadResult = await fileManager.uploadFile(pdfPath, {
         mimeType: "application/pdf",
         displayName: "Process Manual",
     });
 
-    // 2. Setup the Analyst Model
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
         model: 'gemini-3-pro-preview',
-        systemInstruction: `You are a Senior Process Analyst. 
+        systemInstruction: `You are a Senior Process Analyst with explainable AI capabilities.
         Your task is to identify every step in a process from the provided document.
-        
         For every action found, you MUST identify:
         1. The Actor (Lane)
-        2. The Action Type (Service Task, User Task, or Gateway)
-        3. The Flow (Where does it go next?)
-        4. Need to be sematically correct for BPMN 2.0 standards.
-        Format the output as a chronological list of steps with technical annotations in parentheses.`
+        2. The Action Type: Events (Start Event, End Event) Activities(User Task) and  Gateways (Possible gateways: Exclusive (XOR), Inclusive (OR), Parallel (AND), Event-Based, Complex)  
+        3. The Flow and connections (Where does it go next?) (Sequence or Message Flow, Association(for comments) (optional))
+        4. The analysis must be semantically correct for BPMN 2.0 standards.
+        
+        You can use all BPMN 2.0 elements: as needed. (Events: Timer Message Error Escalation Conditional Signal Multiple Parallel Multiple Cancel Compensation Link Terminate Tasks User Manual Service Script Business Rule Send Receive Sub-process markers Loop Multi-Instance (Parallel, Sequential) Ad-Hoc Transaction Event Sub-Process, Data Object Data Input Data Output Data Store Data Association)
+        You MUST return a JSON response with the following structure:
+        {
+          "decision": "A brief, one-sentence summary of the analyzed process.",
+          "explanation": "A detailed, chronological list of all identified process steps with technical annotations in parentheses. Each step should be on a new line."
+        }`
     });
 
-    // 3. Extract the logic
-    console.log("🧐 Analyzing document structure...");
-    const result = await model.generateContentStream([
-        {
-            fileData: {
-                mimeType: uploadResult.file.mimeType,
-                fileUri: uploadResult.file.uri,
+    const result = await model.generateContent({
+        contents: [
+            {
+                fileData: {
+                    mimeType: uploadResult.file.mimeType,
+                    fileUri: uploadResult.file.uri,
+                },
             },
+            { text: "Extract the complete end-to-end process from this PDF and provide the analysis in the specified JSON format." },
+        ],
+        generationConfig: {
+            responseMimeType: "application/json",
         },
-        { text: "Extract the complete end-to-end process from this PDF." },
-    ]);
+    });
 
-    for await (const chunk of result.stream) {
-        console.log(chunk.text());
-     }
-    const extractedLogic = (await result.response).text();
-    console.log("✅ Analysis Complete.");
-    
-    return extractedLogic;
+    const responseText = result.response.text();
+    let parsedResponse: ProcessAnalysisResponse;
+
+    try {
+        parsedResponse = JSON.parse(responseText);
+    } catch (e) {
+        console.error("Failed to parse JSON response:", responseText);
+        // Fallback if JSON parsing fails
+        parsedResponse = {
+            decision: "Failed to analyze document.",
+            explanation: `Could not parse the response from the AI model. Raw response: ${responseText}`
+        };
+    }
+
+    return parsedResponse;
 }
 
-// --- Usage ---
-const processLogic = await analyzeProcessDocument("./ZAKON.pdf");
-fs.writeFileSync('processLogic2.txt', processLogic);
-console.log(processLogic);
+// async function main() {
+//     const result = await analyzeProcessDocument("./COBIT.pdf");
+//     console.log(JSON.stringify(result, null, 2));
+// }

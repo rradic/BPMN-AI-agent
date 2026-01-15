@@ -1,52 +1,71 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as fs from 'fs';
-// 1. Initialize the SDK
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY');
 
-async function generateBPMN(processDescription: string) {
-    // 2. Access Gemini 3 Pro
-    const model = genAI.getGenerativeModel({ 
+const API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyCvqvBIFscgo9xlWCHe_dkVjq0W8sl0Ulk';
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+export interface BPMNGenerationResponse {
+    decision: string;
+    explanation: string;
+    bpmnXml: string;
+}
+
+export async function generateBPMN(processDescription: string, outputFile?: string): Promise<BPMNGenerationResponse> {
+    const model = genAI.getGenerativeModel({
         model: "gemini-3-pro-preview",
-        systemInstruction: `You are a BPMN 2.0 Architect. 
+        systemInstruction: `You are a BPMN 2.0 Architect with explainable AI capabilities.
         Convert process descriptions into valid BPMN 2.0 XML.
         Include 'bpmndi' tags with X/Y coordinates for all elements.
-        Return ONLY the XML string without markdown code blocks.`,
+        You can use all BPMN 2.0 elements: as needed. (Events: Timer Message Error Escalation Conditional Signal Multiple Parallel Multiple Cancel Compensation Link Terminate Tasks User Manual Service Script Business Rule Send Receive Sub-process markers Loop Multi-Instance (Parallel, Sequential) Ad-Hoc Transaction Event Sub-Process, Data Object Data Input Data Output Data Store Data Association)
+
+        You MUST return a JSON response with the following structure:
+        {
+            "decision": "A brief summary of the BPMN model created (e.g., 'Generated BPMN with 12 tasks, 3 gateways, 2 pools')",
+            "explanation": "Detailed reasoning explaining: 1) How you interpreted the process description, 2) Key design decisions made (task types, gateway placements, lane assignments), 3) Any assumptions or inferences made from the input",
+            "bpmnXml": "The complete valid BPMN 2.0 XML string"
+        }
+
+        Your explanation should help users understand WHY the model was structured this way.`,
     });
-    
 
-    // const generationConfig = {
-    //     temperature: 1.0,
-    //     topP: 0.95,
-    //     thinkingLevel: "high", // Critical for complex structural XML
-    //     responseMimeType: "application/xml",
-    // };
+    const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: `Process: ${processDescription}` }] }],
+        generationConfig: {
+            // @ts-ignore - Some TS versions might not have these types yet
+            thinkingConfig: {
+                includeThoughts: true
+            },
+            temperature: 1.0,
+            responseMimeType: "application/json",
+        },
+    });
 
-    // const prompt = `Generate a complete BPMN 2.0 XML for this process: ${processDescription}`;
+    const responseText = result.response.text();
+    let parsedResponse: BPMNGenerationResponse;
 
     try {
-        console.log("Gemini is thinking and drafting your diagram...");
-        const result = await model.generateContent({
-            contents: [{ role: "user", parts: [{ text: `Process: ${processDescription}` }] }],
-            generationConfig: {
-                // Correct structure for Gemini 3 'Thinking'
-                // @ts-ignore - Some TS versions might not have these types yet
-                thinkingConfig: {
-                    // thinkingLevel: "high", // Options: "low" or "high"
-                    includeThoughts: true  // Optional: lets you see the reasoning
-                },
-                temperature: 1.0, 
-                responseMimeType: "application/xml",
-            },
-        });
-        const xmlContent = result.response.text();
-        
-        // 4. Save the file
-        fs.writeFileSync('output_diagram8.bpmn', xmlContent);
-        console.log("Success! File saved as 'output_diagram.bpmn'");
-    } catch (error) {
-        console.error("Error generating BPMN:", error);
+        parsedResponse = JSON.parse(responseText);
+    } catch (e) {
+        // Fallback if JSON parsing fails - wrap raw XML in structured response
+        parsedResponse = {
+            decision: "BPMN model generated successfully",
+            explanation: "The model was generated based on the provided process description. Unable to provide detailed explanation due to response format.",
+            bpmnXml: responseText
+        };
     }
+
+    if (outputFile) {
+        fs.writeFileSync(outputFile, parsedResponse.bpmnXml);
+        console.log(`Success! File saved as '${outputFile}'`);
+    }
+
+    return parsedResponse;
 }
+
+// async function main() {
+//     const description = fs.readFileSync('processLogic4.txt', 'utf-8');
+//     await generateBPMN(description, 'cobit_dss.bpmn');
+// }
 
 // --- Usage ---
 // const description = `
@@ -419,6 +438,6 @@ async function generateBPMN(processDescription: string) {
 // (End Event in Company / Customer Success / IT Ops lane)
 // `;
 
-const  description = fs.readFileSync('processLogic2.txt', 'utf-8');
+const  description = fs.readFileSync('processLogic4.txt', 'utf-8');
 
 generateBPMN(description);
