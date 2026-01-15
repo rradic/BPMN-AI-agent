@@ -12,7 +12,7 @@ export interface BPMNGenerationResponse {
 
 export async function generateBPMN(processDescription: string, outputFile?: string): Promise<BPMNGenerationResponse> {
     const model = genAI.getGenerativeModel({
-        model: "gemini-3-pro-preview",
+        model: "gemini-2.0-flash-exp",
         systemInstruction: `You are a BPMN 2.0 Architect with explainable AI capabilities.
         Convert process descriptions into valid BPMN 2.0 XML.
         Include 'bpmndi' tags with X/Y coordinates for all elements.
@@ -44,7 +44,7 @@ export async function generateBPMN(processDescription: string, outputFile?: stri
     let parsedResponse: BPMNGenerationResponse;
 
     try {
-        parsedResponse = JSON.parse(responseText);
+        parsedResponse = JSON.parse(responseText.replace(/```json\n?|\n?```/g, ''));
     } catch (e) {
         // Fallback if JSON parsing fails - wrap raw XML in structured response
         parsedResponse = {

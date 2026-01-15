@@ -18,7 +18,7 @@ export async function analyzeProcessDocument(pdfPath: string): Promise<ProcessAn
     });
 
     const model = genAI.getGenerativeModel({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-2.0-flash-exp',
         systemInstruction: `You are a Senior Process Analyst with explainable AI capabilities.
         Your task is to identify every step in a process from the provided document.
         For every action found, you MUST identify:
@@ -35,8 +35,8 @@ export async function analyzeProcessDocument(pdfPath: string): Promise<ProcessAn
         }`
     });
 
-    const result = await model.generateContent({
-        contents: [
+    const result = await model.generateContent(
+        [
             {
                 fileData: {
                     mimeType: uploadResult.file.mimeType,
@@ -44,17 +44,27 @@ export async function analyzeProcessDocument(pdfPath: string): Promise<ProcessAn
                 },
             },
             { text: "Extract the complete end-to-end process from this PDF and provide the analysis in the specified JSON format." },
-        ],
-        generationConfig: {
-            responseMimeType: "application/json",
-        },
-    });
+        ]
+    // {
+    //         {
+    //             fileData: {
+    //                 mimeType: uploadResult.file.mimeType,
+    //                 fileUri: uploadResult.file.uri,
+    //             },
+    //         },
+    //        ,
+    //
+    //     // generationConfig: {
+    //     //     responseMimeType: "application/json",
+    //     // },
+    // }
+    );
 
     const responseText = result.response.text();
     let parsedResponse: ProcessAnalysisResponse;
 
     try {
-        parsedResponse = JSON.parse(responseText);
+        parsedResponse = JSON.parse(responseText.replace(/```json\n?|\n?```/g, ''));
     } catch (e) {
         console.error("Failed to parse JSON response:", responseText);
         // Fallback if JSON parsing fails

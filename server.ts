@@ -5,6 +5,16 @@ import fs from 'fs';
 import cors from 'cors'
 import { generateBPMN } from './agent.js';
 import { analyzeProcessDocument } from './agent2.js';
+import {
+    analyzeProcessStructure,
+    generateProcessScenarios,
+    simulateProcess,
+    optimizeProcess,
+    fullProcessAnalysis,
+    type ProcessStructure,
+    type Scenario,
+    type SimulationResult
+} from './agent3.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -177,6 +187,167 @@ app.post('/api/pipeline/pdf-to-bpmn', upload.single('pdf'), async (req: Request,
     }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// AGENT 3: Process Optimization Endpoints
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Agent 3: Analyze process structure from description
+ * POST /api/agent3/analyze
+ * Body: { "processDescription": "...", "bpmnXml": "..." (optional) }
+ * Returns: { decision, explanation, processStructure }
+ */
+app.post('/api/agent3/analyze', async (req: Request, res: Response) => {
+    try {
+        const { processDescription, bpmnXml } = req.body;
+
+        if (!processDescription || typeof processDescription !== 'string') {
+            res.status(400).json({
+                error: 'Missing or invalid processDescription in request body'
+            });
+            return;
+        }
+
+        console.log('Agent3: Analyzing process structure...');
+        const result = await analyzeProcessStructure(processDescription, bpmnXml);
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error analyzing process:', error);
+        res.status(500).json({
+            error: 'Failed to analyze process structure',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+/**
+ * Agent 3: Generate simulation scenarios
+ * POST /api/agent3/scenarios
+ * Body: { "processStructure": {...} }
+ * Returns: { decision, explanation, scenarios }
+ */
+app.post('/api/agent3/scenarios', async (req: Request, res: Response) => {
+    try {
+        const { processStructure } = req.body;
+
+        if (!processStructure) {
+            res.status(400).json({
+                error: 'Missing processStructure in request body'
+            });
+            return;
+        }
+
+        console.log('Agent3: Generating scenarios...');
+        const result = await generateProcessScenarios(processStructure as ProcessStructure);
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error generating scenarios:', error);
+        res.status(500).json({
+            error: 'Failed to generate scenarios',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+/**
+ * Agent 3: Run process simulation
+ * POST /api/agent3/simulate
+ * Body: { "processStructure": {...}, "scenarios": [...], "numInstances": 100 }
+ * Returns: { decision, explanation, simulationResults }
+ */
+app.post('/api/agent3/simulate', async (req: Request, res: Response) => {
+    try {
+        const { processStructure, scenarios, numInstances = 100 } = req.body;
+
+        if (!processStructure || !scenarios) {
+            res.status(400).json({
+                error: 'Missing processStructure or scenarios in request body'
+            });
+            return;
+        }
+
+        console.log('Agent3: Running simulation...');
+        const result = await simulateProcess(
+            processStructure as ProcessStructure,
+            scenarios as Scenario[],
+            numInstances
+        );
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error running simulation:', error);
+        res.status(500).json({
+            error: 'Failed to run simulation',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+/**
+ * Agent 3: Optimize process (bottleneck detection + recommendations)
+ * POST /api/agent3/optimize
+ * Body: { "processStructure": {...}, "simulationResults": [...] }
+ * Returns: { decision, explanation, bottleneckAnalysis, improvements, tradeoffAnalysis }
+ */
+app.post('/api/agent3/optimize', async (req: Request, res: Response) => {
+    try {
+        const { processStructure, simulationResults } = req.body;
+
+        if (!processStructure || !simulationResults) {
+            res.status(400).json({
+                error: 'Missing processStructure or simulationResults in request body'
+            });
+            return;
+        }
+
+        console.log('Agent3: Optimizing process...');
+        const result = await optimizeProcess(
+            processStructure as ProcessStructure,
+            simulationResults as SimulationResult[]
+        );
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error optimizing process:', error);
+        res.status(500).json({
+            error: 'Failed to optimize process',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+/**
+ * Agent 3: Full analysis pipeline
+ * POST /api/agent3/full-analysis
+ * Body: { "processDescription": "...", "bpmnXml": "..." (optional), "numInstances": 50 }
+ * Returns: { decision, explanation, results, report }
+ */
+app.post('/api/agent3/full-analysis', async (req: Request, res: Response) => {
+    try {
+        const { processDescription, bpmnXml, numInstances = 50 } = req.body;
+
+        if (!processDescription || typeof processDescription !== 'string') {
+            res.status(400).json({
+                error: 'Missing or invalid processDescription in request body'
+            });
+            return;
+        }
+
+        console.log('Agent3: Running full analysis pipeline...');
+        const result = await fullProcessAnalysis(processDescription, bpmnXml, numInstances);
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error in full analysis:', error);
+        res.status(500).json({
+            error: 'Failed to complete full analysis',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: express.NextFunction) => {
     console.error('Unhandled error:', err);
@@ -194,6 +365,11 @@ app.listen(PORT, () => {
     console.log('  POST /api/agent1/generate-bpmn  - Generate BPMN from text');
     console.log('  POST /api/agent2/analyze-pdf    - Extract process from PDF');
     console.log('  POST /api/pipeline/pdf-to-bpmn  - PDF to BPMN pipeline');
+    console.log('  POST /api/agent3/analyze        - Analyze process structure');
+    console.log('  POST /api/agent3/scenarios      - Generate what-if scenarios');
+    console.log('  POST /api/agent3/simulate       - Run process simulation');
+    console.log('  POST /api/agent3/optimize       - Optimize process (bottlenecks + recommendations)');
+    console.log('  POST /api/agent3/full-analysis  - Full optimization pipeline');
 });
 
 export default app;

@@ -1,12 +1,215 @@
 // BPMN Process Optimization AI Agent with Gemini
 // Install: npm install @google/generative-ai csv-writer
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const fs = require('fs').promises;
-const { createObjectCsvWriter } = require('csv-writer');
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import fs from 'fs/promises';
+import { createObjectCsvWriter } from 'csv-writer';
+
+// Type definitions for Agent3 optimization results
+export interface ActivityDuration {
+  min: number;
+  max: number;
+  unit: string;
+}
+
+export interface ProcessActivity {
+  id: string;
+  name: string;
+  type: 'task' | 'decision' | 'parallel' | 'approval';
+  performer: string;
+  duration: ActivityDuration;
+  cost: number;
+  resources: number;
+  probability: number;
+}
+
+export interface ProcessFlow {
+  from: string;
+  to: string;
+  condition: string | null;
+  probability: number;
+}
+
+export interface ProcessResource {
+  role: string;
+  capacity: number;
+  costPerHour: number;
+}
+
+export interface ProcessStructure {
+  processName: string;
+  activities: ProcessActivity[];
+  flows: ProcessFlow[];
+  resources: ProcessResource[];
+}
+
+export interface ScenarioModification {
+  id: string;
+  duration?: ActivityDuration;
+  cost?: number;
+  resources?: number;
+}
+
+export interface Scenario {
+  scenarioName: string;
+  description?: string;
+  modifications?: {
+    activities?: ScenarioModification[];
+    resources?: ProcessResource[];
+  };
+}
+
+export interface SimulationEvent {
+  caseId: number;
+  activity: string;
+  activityId: string;
+  event: 'start' | 'complete';
+  timestamp: Date;
+  resource: string;
+  cost: number;
+  duration?: number;
+}
+
+export interface ThroughputMetrics {
+  avg: number;
+  min: number;
+  max: number;
+  median: number;
+}
+
+export interface CostMetrics {
+  avg: number;
+  total: number;
+}
+
+export interface PerformanceMetrics {
+  throughput: ThroughputMetrics;
+  cost: CostMetrics;
+  waitingTime: Record<string, number>;
+  utilization: Record<string, number>;
+  casesCompleted: number;
+}
+
+export interface SimulationResult {
+  scenario: string;
+  metrics: PerformanceMetrics;
+  events: SimulationEvent[];
+}
+
+export interface Bottleneck {
+  activityId: string;
+  activityName: string;
+  severity: 'high' | 'medium' | 'low';
+  reason: string;
+  impact: string;
+  metrics: {
+    utilization: number;
+    waitingTime: number;
+    frequency: number;
+  };
+}
+
+export interface AntiPattern {
+  pattern: string;
+  location: string;
+  description: string;
+}
+
+export interface BottleneckAnalysis {
+  bottlenecks: Bottleneck[];
+  antiPatterns: AntiPattern[];
+}
+
+export interface ExpectedImpact {
+  throughputReduction: string;
+  costChange: string;
+  riskLevel: 'low' | 'medium' | 'high';
+}
+
+export interface Recommendation {
+  id: string;
+  title: string;
+  type: 'parallelize' | 'aggregate' | 'remove' | 'automate' | 'reallocate';
+  description: string;
+  affectedActivities: string[];
+  expectedImpact: ExpectedImpact;
+  implementation: string;
+}
+
+export interface ToBeModel {
+  activities: ProcessActivity[];
+  flows: ProcessFlow[];
+  changes: string;
+}
+
+export interface Improvements {
+  recommendations: Recommendation[];
+  toBeModel: ToBeModel;
+  tradeoffAnalysis: {
+    costVsTime: string;
+    costVsRisk: string;
+    timeVsRisk: string;
+  };
+}
+
+export interface TradeoffAnalysis {
+  paretoFrontier: string[];
+  recommendations: {
+    costOptimal: string;
+    timeOptimal: string;
+    balanced: string;
+  };
+  analysis: string;
+}
+
+export interface OptimizationResults {
+  processStructure: ProcessStructure;
+  scenarios: Scenario[];
+  simulationResults: SimulationResult[];
+  bottleneckAnalysis: BottleneckAnalysis;
+  improvements: Improvements;
+  tradeoffAnalysis: TradeoffAnalysis;
+}
+
+// API Response types
+export interface Agent3AnalyzeResponse {
+  decision: string;
+  explanation: string;
+  processStructure: ProcessStructure;
+}
+
+export interface Agent3ScenariosResponse {
+  decision: string;
+  explanation: string;
+  scenarios: Scenario[];
+}
+
+export interface Agent3SimulateResponse {
+  decision: string;
+  explanation: string;
+  simulationResults: SimulationResult[];
+}
+
+export interface Agent3OptimizeResponse {
+  decision: string;
+  explanation: string;
+  bottleneckAnalysis: BottleneckAnalysis;
+  improvements: Improvements;
+  tradeoffAnalysis: TradeoffAnalysis;
+}
+
+export interface Agent3FullAnalysisResponse {
+  decision: string;
+  explanation: string;
+  results: OptimizationResults;
+  report: string;
+}
 
 class BPMNOptimizationAgent {
-  constructor(apiKey) {
+  private genAI: GoogleGenerativeAI;
+  private model: GenerativeModel;
+
+  constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
   }
@@ -47,6 +250,7 @@ Identificiraj vse aktivnosti, odločitvene točke, paralelne tokove in odobritve
 
     const result = await this.model.generateContent(prompt);
     const text = result.response.text();
+    console.log(text)
     return JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
   }
 
@@ -63,16 +267,38 @@ Generiraj scenarije kot:
 4. Povečana kapaciteta (več resursov)
 5. Avtomatizirani procesi (nekaterim aktivnostim zmanjšamo čas)
 
-Vrni JSON array scenarijev z modifikacijami aktivnosti in resursov.`;
+Vrni JSON array scenarijev z modifikacijami aktivnosti in resursov. JSON mora biti kot ta js objekt:
+{
+  scenarioName: string;
+  description?: string;
+  modifications?: {
+    activities?: ScenarioModification[];
+    resources?: ProcessResource[];
+  }
+  
+ScenarioModification {
+  id: string;
+  duration?: ActivityDuration;
+  cost?: number;
+  resources?: number;
+}
+ProcessResource {
+  role: string;
+  capacity: number;
+  costPerHour: number;
+} `;
+
+
 
     const result = await this.model.generateContent(prompt);
     const text = result.response.text();
+    console.log(text)
     return JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
   }
 
   // 3. Simulacija procesa in generiranje event logov
   async simulateProcess(processStructure, scenario, numInstances = 100) {
-    console.log(`Simuliram proces: ${scenario.name} (${numInstances} instanc)...`);
+    console.log(`Simuliram proces: ${scenario.scenarioName} (${numInstances} instanc)...`);
     
     const events = [];
     const resourceUtilization = {};
@@ -482,13 +708,14 @@ Vrni JSON z:
         );
 
         simulationResults.push({
-          scenario: scenario.name,
+          scenario: scenario.scenarioName,
           metrics,
           events
         });
 
         // Shrani event log za baseline
-        if (scenario.name.includes('Baseline')) {
+        console.log(scenarios)
+        if (scenario.scenarioName.includes('Baseline')) {
           await this.saveEventLogToCsv(events, 'baseline_event_log.csv');
         }
       }
@@ -628,42 +855,209 @@ ${result.scenario}:
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PRIMER UPORABE
+// API EXPORT FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 
-async function main() {
-  // POMEMBNO: Zamenjaj z svojim Gemini API ključem
-  const API_KEY = 'your-gemini-api-key-here';
-  
-  const agent = new BPMNOptimizationAgent(API_KEY);
+// Singleton instance for server usage
+let agentInstance: BPMNOptimizationAgent | null = null;
 
-  // Dodati vrednost resursa kao varijablu ili da ai generise te info
-  const processDescription = `
-
-
-Resursi:
-- Delavci: 20 oseb (25€/uro)
-- Vodje: 3 osebe (45€/uro)
-- Nabavni referenti: 2 osebi (30€/uro)
-- Skladiščniki: 4 osebe (22€/uro)
-- Direktor: 1 oseba (80€/uro)
-`;
-
-  try {
-    const results = await agent.analyzeAndOptimize(processDescription, null, 50);
-    
-    const report = agent.generateReport(results);
-    console.log(report);
-    
-    await fs.writeFile('process_optimization_report.txt', report);
-    console.log('\n✅ Analiza uspešno zaključena!');
-    console.log('📄 Poročilo shranjeno v: process_optimization_report.txt');
-    console.log('📊 Podatki shranjeni v: optimization_results.json');
-    console.log('📋 Event log shranjen v: baseline_event_log.csv');
-    
-  } catch (error) {
-    console.error('Napaka:', error.message);
+function getAgent(): BPMNOptimizationAgent {
+  if (!agentInstance) {
+    const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyCvqvBIFscgo9xlWCHe_dkVjq0W8sl0Ulk';
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY environment variable is required');
+    }
+    agentInstance = new BPMNOptimizationAgent(apiKey);
   }
+  return agentInstance;
 }
+
+/**
+ * Analyze process structure from description and optional BPMN diagram
+ */
+export async function analyzeProcessStructure(
+  processDescription: string,
+  bpmnXml?: string
+): Promise<Agent3AnalyzeResponse> {
+  const agent = getAgent();
+
+  console.log('Agent3: Extracting process structure...');
+  const processStructure = await agent.extractProcessStructure(processDescription, bpmnXml);
+
+  return {
+    decision: `Extracted ${processStructure.activities.length} activities, ${processStructure.flows.length} flows, and ${processStructure.resources.length} resource types from process description`,
+    explanation: `Process "${processStructure.processName}" has been analyzed. Found activities: ${processStructure.activities.map(a => a.name).join(', ')}. The process involves ${processStructure.resources.map(r => r.role).join(', ')} as key performers.`,
+    processStructure
+  };
+}
+
+/**
+ * Generate what-if scenarios for a process structure
+ */
+export async function generateProcessScenarios(
+  processStructure: ProcessStructure
+): Promise<Agent3ScenariosResponse> {
+  const agent = getAgent();
+
+  console.log('Agent3: Generating what-if scenarios...');
+  const scenarios = await agent.generateScenarios(processStructure);
+
+  return {
+    decision: `Generated ${scenarios.length} simulation scenarios for process optimization`,
+    explanation: `Created scenarios: ${scenarios.map((s: Scenario) => s.name).join(', ')}. These scenarios cover baseline performance, optimistic/pessimistic variations, increased capacity, and automation possibilities.`,
+    scenarios
+  };
+}
+
+/**
+ * Run simulation for process with given scenarios
+ */
+export async function simulateProcess(
+  processStructure: ProcessStructure,
+  scenarios: Scenario[],
+  numInstances: number = 100
+): Promise<Agent3SimulateResponse> {
+  const agent = getAgent();
+
+  console.log(`Agent3: Simulating process with ${numInstances} instances per scenario...`);
+  const simulationResults: SimulationResult[] = [];
+
+  for (const scenario of scenarios) {
+    const { events, resourceUtilization } = await agent.simulateProcess(
+      processStructure,
+      scenario,
+      numInstances
+    );
+
+    const metrics = agent.calculatePerformanceMetrics(
+      events,
+      resourceUtilization,
+      processStructure
+    );
+
+    // Don't include full events in response to reduce payload size
+    simulationResults.push({
+      scenario: scenario.scenarioName,
+      metrics,
+      events: [] // Events excluded from API response for performance
+    });
+  }
+
+  const baselineMetrics = simulationResults[0]?.metrics;
+
+  return {
+    decision: `Completed simulation of ${scenarios.length} scenarios with ${numInstances} instances each`,
+    explanation: `Baseline performance: avg throughput ${baselineMetrics?.throughput.avg.toFixed(2)} hours, avg cost €${baselineMetrics?.cost.avg.toFixed(2)}. Resource utilization varies across scenarios. Detailed metrics available for each scenario.`,
+    simulationResults
+  };
+}
+
+/**
+ * Perform full optimization analysis including bottleneck detection and recommendations
+ */
+export async function optimizeProcess(
+  processStructure: ProcessStructure,
+  simulationResults: SimulationResult[]
+): Promise<Agent3OptimizeResponse> {
+  const agent = getAgent();
+
+  const baselineResult = simulationResults[0];
+  if (!baselineResult) {
+    throw new Error('No simulation results available for optimization');
+  }
+
+  console.log('Agent3: Detecting bottlenecks...');
+  const bottleneckAnalysis = await agent.detectBottlenecks(
+    processStructure,
+    baselineResult.metrics,
+    baselineResult.events
+  );
+
+  console.log('Agent3: Generating improvements...');
+  const improvements = await agent.generateImprovements(
+    processStructure,
+    bottleneckAnalysis,
+    baselineResult.metrics
+  );
+
+  console.log('Agent3: Performing trade-off analysis...');
+  const tradeoffAnalysis = await agent.performTradeoffAnalysis(
+    improvements,
+    baselineResult.metrics
+  );
+
+  return {
+    decision: `Identified ${bottleneckAnalysis.bottlenecks.length} bottlenecks and generated ${improvements.recommendations.length} optimization recommendations`,
+    explanation: `Key bottlenecks: ${bottleneckAnalysis.bottlenecks.map(b => b.activityName).join(', ')}. Recommended optimizations include: ${improvements.recommendations.map(r => r.title).join(', ')}. Trade-off analysis suggests ${tradeoffAnalysis.recommendations.balanced} as balanced option.`,
+    bottleneckAnalysis,
+    improvements,
+    tradeoffAnalysis
+  };
+}
+
+/**
+ * Full analysis pipeline - combines all steps
+ */
+export async function fullProcessAnalysis(
+  processDescription: string,
+  bpmnXml?: string,
+  numInstances: number = 50
+): Promise<Agent3FullAnalysisResponse> {
+  const agent = getAgent();
+
+  console.log('Agent3: Starting full process analysis...');
+
+  const results = await agent.analyzeAndOptimize(processDescription, bpmnXml, numInstances);
+  const report = agent.generateReport(results);
+
+  return {
+    decision: `Completed full optimization analysis for "${results.processStructure.processName}"`,
+    explanation: `Analyzed ${results.processStructure.activities.length} activities across ${results.scenarios.length} scenarios. Found ${results.bottleneckAnalysis.bottlenecks.length} bottlenecks and generated ${results.improvements.recommendations.length} improvement recommendations. Trade-off analysis completed with Pareto frontier identification.`,
+    results,
+    report
+  };
+}
+
+// Export the class for direct usage
+export { BPMNOptimizationAgent };
+
+// ═══════════════════════════════════════════════════════════════
+// PRIMER UPORABE (CLI)
+// ═══════════════════════════════════════════════════════════════
+//
+// async function main() {
+//   // POMEMBNO: Zamenjaj z svojim Gemini API ključem
+//   const API_KEY = process.env.GEMINI_API_KEY || 'your-gemini-api-key-here';
+//
+//   const agent = new BPMNOptimizationAgent(API_KEY);
+//
+//   // Dodati vrednost resursa kao varijablu ali da ai generise te info
+//   const processDescription = `
+//
+//
+// Resursi:
+// - Delavci: 20 oseb (25€/uro)
+// - Vodje: 3 osebe (45€/uro)
+// - Nabavni referenti: 2 osebi (30€/uro)
+// - Skladiščniki: 4 osebe (22€/uro)
+// - Direktor: 1 oseba (80€/uro)
+// `;
+//
+//   try {
+//     const results = await agent.analyzeAndOptimize(processDescription, null, 50);
+//
+//     const report = agent.generateReport(results);
+//     console.log(report);
+//
+//     await fs.writeFile('process_optimization_report.txt', report);
+//     console.log('\n✅ Analiza uspešno zaključena!');
+//     console.log('📄 Poročilo shranjeno v: process_optimization_report.txt');
+//     console.log('📊 Podatki shranjeni v: optimization_results.json');
+//     console.log('📋 Event log shranjen v: baseline_event_log.csv');
+//
+//   } catch (error: any) {
+//     console.error('Napaka:', error.message);
+//   }
+// }
 
 
