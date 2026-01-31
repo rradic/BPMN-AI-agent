@@ -1,8 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as fs from 'fs';
-
-const API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyCvqvBIFscgo9xlWCHe_dkVjq0W8sl0Ulk';
-const genAI = new GoogleGenerativeAI(API_KEY);
+import { generateContent, type AIProviderConfig } from './aiProvider.js';
 
 export interface BPMNGenerationResponse {
     decision: string;
@@ -10,37 +7,38 @@ export interface BPMNGenerationResponse {
     bpmnXml: string;
 }
 
-export async function generateBPMN(processDescription: string, outputFile?: string): Promise<BPMNGenerationResponse> {
-    const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash-exp",
-        systemInstruction: `You are a BPMN 2.0 Architect with explainable AI capabilities.
-        Convert process descriptions into valid BPMN 2.0 XML.
-        Include 'bpmndi' tags with X/Y coordinates for all elements.
-        You can use all BPMN 2.0 elements: as needed. (Events: Timer Message Error Escalation Conditional Signal Multiple Parallel Multiple Cancel Compensation Link Terminate Tasks User Manual Service Script Business Rule Send Receive Sub-process markers Loop Multi-Instance (Parallel, Sequential) Ad-Hoc Transaction Event Sub-Process, Data Object Data Input Data Output Data Store Data Association)
+const SYSTEM_INSTRUCTION = `You are a BPMN 2.0 Architect with explainable AI capabilities.
+Convert process descriptions into valid BPMN 2.0 XML.
+Include 'bpmndi' tags with X/Y coordinates for all elements.
+You can use all BPMN 2.0 elements: as needed. (Events: Timer Message Error Escalation Conditional Signal Multiple Parallel Multiple Cancel Compensation Link Terminate Tasks User Manual Service Script Business Rule Send Receive Sub-process markers Loop Multi-Instance (Parallel, Sequential) Ad-Hoc Transaction Event Sub-Process, Data Object Data Input Data Output Data Store Data Association)
 
-        You MUST return a JSON response with the following structure:
+You MUST return a JSON response with the following structure:
+{
+    "decision": "A brief summary of the BPMN model created (e.g., 'Generated BPMN with 12 tasks, 3 gateways, 2 pools')",
+    "explanation": "Detailed reasoning explaining: 1) How you interpreted the process description, 2) Key design decisions made (task types, gateway placements, lane assignments), 3) Any assumptions or inferences made from the input",
+    "bpmnXml": "The complete valid BPMN 2.0 XML string"
+}
+
+Your explanation should help users understand WHY the model was structured this way.`;
+
+export async function generateBPMN(
+    processDescription: string,
+    outputFile?: string,
+    providerConfig?: AIProviderConfig
+): Promise<BPMNGenerationResponse> {
+    const config = providerConfig || { model: 'gemini', apiKey: '' };
+
+    const result = await generateContent(
+        config,
+        `Process: ${processDescription}`,
         {
-            "decision": "A brief summary of the BPMN model created (e.g., 'Generated BPMN with 12 tasks, 3 gateways, 2 pools')",
-            "explanation": "Detailed reasoning explaining: 1) How you interpreted the process description, 2) Key design decisions made (task types, gateway placements, lane assignments), 3) Any assumptions or inferences made from the input",
-            "bpmnXml": "The complete valid BPMN 2.0 XML string"
-        }
-
-        Your explanation should help users understand WHY the model was structured this way.`,
-    });
-
-    const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: `Process: ${processDescription}` }] }],
-        generationConfig: {
-            // @ts-ignore - Some TS versions might not have these types yet
-            thinkingConfig: {
-                includeThoughts: true
-            },
+            systemInstruction: SYSTEM_INSTRUCTION,
             temperature: 1.0,
-            responseMimeType: "application/json",
-        },
-    });
+            responseFormat: 'json',
+        }
+    );
 
-    const responseText = result.response.text();
+    const responseText = result.text;
     let parsedResponse: BPMNGenerationResponse;
 
     try {

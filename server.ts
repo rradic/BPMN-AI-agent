@@ -15,6 +15,15 @@ import {
     type Scenario,
     type SimulationResult
 } from './agent3.js';
+import { getProviderConfig, type AIProviderConfig } from './aiProvider.js';
+
+// Helper to extract AI provider config from request headers
+function extractProviderConfig(req: Request): AIProviderConfig {
+    return getProviderConfig({
+        'x-ai-model': req.headers['x-ai-model'] as string | undefined,
+        'x-ai-api-key': req.headers['x-ai-api-key'] as string | undefined
+    });
+}
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -68,8 +77,9 @@ app.post('/api/agent1/generate-bpmn', async (req: Request, res: Response) => {
             return;
         }
 
-        console.log('Generating BPMN for process description...');
-        const result = await generateBPMN(processDescription);
+        const providerConfig = extractProviderConfig(req);
+        console.log(`Generating BPMN using ${providerConfig.model}...`);
+        const result = await generateBPMN(processDescription, undefined, providerConfig);
 
         // Return structured response with decision, explanation, and bpmnXml
         res.json({
@@ -100,9 +110,10 @@ app.post('/api/agent2/analyze-pdf', upload.single('pdf'), async (req: Request, r
         }
 
         const pdfPath = req.file.path;
-        console.log(`Analyzing PDF: ${req.file.originalname}`);
+        const providerConfig = extractProviderConfig(req);
+        console.log(`Analyzing PDF: ${req.file.originalname} using ${providerConfig.model}...`);
 
-        const result = await analyzeProcessDocument(pdfPath);
+        const result = await analyzeProcessDocument(pdfPath, providerConfig);
 
         // Clean up uploaded file
         fs.unlinkSync(pdfPath);
@@ -142,15 +153,16 @@ app.post('/api/pipeline/pdf-to-bpmn', upload.single('pdf'), async (req: Request,
         }
 
         const pdfPath = req.file.path;
-        console.log(`Processing PDF to BPMN: ${req.file.originalname}`);
+        const providerConfig = extractProviderConfig(req);
+        console.log(`Processing PDF to BPMN: ${req.file.originalname} using ${providerConfig.model}...`);
 
         // Step 1: Extract process logic from PDF
         console.log('Step 1: Extracting process logic...');
-        const analysisResult = await analyzeProcessDocument(pdfPath);
+        const analysisResult = await analyzeProcessDocument(pdfPath, providerConfig);
 
         // Step 2: Generate BPMN from extracted logic
         console.log('Step 2: Generating BPMN...');
-        const bpmnResult = await generateBPMN(analysisResult.explanation);
+        const bpmnResult = await generateBPMN(analysisResult.explanation, undefined, providerConfig);
 
         // Clean up uploaded file
         fs.unlinkSync(pdfPath);
@@ -208,8 +220,9 @@ app.post('/api/agent3/analyze', async (req: Request, res: Response) => {
             return;
         }
 
-        console.log('Agent3: Analyzing process structure...');
-        const result = await analyzeProcessStructure(processDescription, bpmnXml);
+        const providerConfig = extractProviderConfig(req);
+        console.log(`Agent3: Analyzing process structure using ${providerConfig.model}...`);
+        const result = await analyzeProcessStructure(processDescription, bpmnXml, providerConfig);
 
         res.json(result);
     } catch (error) {
@@ -238,8 +251,9 @@ app.post('/api/agent3/scenarios', async (req: Request, res: Response) => {
             return;
         }
 
-        console.log('Agent3: Generating scenarios...');
-        const result = await generateProcessScenarios(processStructure as ProcessStructure);
+        const providerConfig = extractProviderConfig(req);
+        console.log(`Agent3: Generating scenarios using ${providerConfig.model}...`);
+        const result = await generateProcessScenarios(processStructure as ProcessStructure, providerConfig);
 
         res.json(result);
     } catch (error) {
@@ -268,11 +282,13 @@ app.post('/api/agent3/simulate', async (req: Request, res: Response) => {
             return;
         }
 
-        console.log('Agent3: Running simulation...');
+        const providerConfig = extractProviderConfig(req);
+        console.log(`Agent3: Running simulation using ${providerConfig.model}...`);
         const result = await simulateProcess(
             processStructure as ProcessStructure,
             scenarios as Scenario[],
-            numInstances
+            numInstances,
+            providerConfig
         );
 
         res.json(result);
@@ -302,10 +318,12 @@ app.post('/api/agent3/optimize', async (req: Request, res: Response) => {
             return;
         }
 
-        console.log('Agent3: Optimizing process...');
+        const providerConfig = extractProviderConfig(req);
+        console.log(`Agent3: Optimizing process using ${providerConfig.model}...`);
         const result = await optimizeProcess(
             processStructure as ProcessStructure,
-            simulationResults as SimulationResult[]
+            simulationResults as SimulationResult[],
+            providerConfig
         );
 
         res.json(result);
@@ -335,8 +353,9 @@ app.post('/api/agent3/full-analysis', async (req: Request, res: Response) => {
             return;
         }
 
-        console.log('Agent3: Running full analysis pipeline...');
-        const result = await fullProcessAnalysis(processDescription, bpmnXml, numInstances);
+        const providerConfig = extractProviderConfig(req);
+        console.log(`Agent3: Running full analysis pipeline using ${providerConfig.model}...`);
+        const result = await fullProcessAnalysis(processDescription, bpmnXml, numInstances, providerConfig);
 
         res.json(result);
     } catch (error) {

@@ -1,11 +1,7 @@
-// BPMN Process Optimization AI Agent with Gemini
-// Install: npm install @google/generative-ai csv-writer
-
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import fs from 'fs/promises';
 import { createObjectCsvWriter } from 'csv-writer';
+import { generateContent, type AIProviderConfig } from './aiProvider.js';
 
-// Type definitions for Agent3 optimization results
 export interface ActivityDuration {
   min: number;
   max: number;
@@ -206,12 +202,23 @@ export interface Agent3FullAnalysisResponse {
 }
 
 class BPMNOptimizationAgent {
-  private genAI: GoogleGenerativeAI;
-  private model: GenerativeModel;
+  private providerConfig: AIProviderConfig;
 
-  constructor(apiKey: string) {
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+  constructor(providerConfig?: AIProviderConfig) {
+    this.providerConfig = providerConfig || { model: 'gemini', apiKey: '' };
+  }
+
+  private async generateAIContent(prompt: string): Promise<string> {
+    const result = await generateContent(
+      this.providerConfig,
+      prompt,
+      {
+        systemInstruction: 'You are a BPMN process optimization expert. Respond only with valid JSON.',
+        temperature: 1.0,
+        responseFormat: 'json',
+      }
+    );
+    return result.text;
   }
 
   // 1. Ekstrakcija strukture procesa iz opisa
@@ -248,8 +255,7 @@ Vrni JSON s sledečo strukturo:
 
 Identificiraj vse aktivnosti, odločitvene točke, paralelne tokove in odobritve.`;
 
-    const result = await this.model.generateContent(prompt);
-    const text = result.response.text();
+    const text = await this.generateAIContent(prompt);
     console.log(text)
     return JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
   }
@@ -288,10 +294,7 @@ ProcessResource {
   costPerHour: number;
 } `;
 
-
-
-    const result = await this.model.generateContent(prompt);
-    const text = result.response.text();
+    const text = await this.generateAIContent(prompt);
     console.log(text)
     return JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
   }
@@ -394,12 +397,10 @@ ProcessResource {
 
       visited.add(activityId);
 
-      // Posodobi utilizacijo resursov
       if (resourceUtil[activity.performer]) {
         resourceUtil[activity.performer].total += duration;
       }
 
-      // Najdi naslednje aktivnosti
       const nextFlows = flows.filter(f => f.from === activityId);
       
       for (const flow of nextFlows) {
@@ -548,8 +549,7 @@ Vrni JSON z:
   ]
 }`;
 
-    const result = await this.model.generateContent(prompt);
-    const text = result.response.text();
+    const text = await this.generateAIContent(prompt);
     return JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
   }
 
@@ -603,8 +603,7 @@ Vrni JSON:
   }
 }`;
 
-    const result = await this.model.generateContent(prompt);
-    const text = result.response.text();
+    const text = await this.generateAIContent(prompt);
     return JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
   }
 
@@ -638,8 +637,7 @@ Vrni JSON z:
   "analysis": "Podrobna analiza trade-offs"
 }`;
 
-    const result = await this.model.generateContent(prompt);
-    const text = result.response.text();
+    const text = await this.generateAIContent(prompt);
     return JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
   }
 
@@ -672,26 +670,26 @@ Vrni JSON z:
     });
 
     await csvWriter.writeRecords(events);
-    console.log(`✓ Event log shranjen v ${filename}`);
+    console.log(`Event log shranjen v ${filename}`);
   }
 
   // 9. Glavna analiza - orchestrator
   async analyzeAndOptimize(processDescription, bpmnDiagram = null, numInstances = 100) {
-    console.log('🚀 Začenjam analizo procesa...\n');
+    console.log('Začenjam analizo procesa...\n');
 
     try {
       // Faza 1: Ekstrakcija strukture
-      console.log('📊 Faza 1: Ekstrakcija strukture procesa...');
+      console.log('Faza 1: Ekstrakcija strukture procesa...');
       const processStructure = await this.extractProcessStructure(processDescription, bpmnDiagram);
-      console.log(`✓ Ekstrahiranih ${processStructure.activities.length} aktivnosti\n`);
+      console.log(`Ekstrahiranih ${processStructure.activities.length} aktivnosti\n`);
 
       // Faza 2: Generiranje scenarijev
-      console.log('🎯 Faza 2: Generiranje what-if scenarijev...');
+      console.log('Faza 2: Generiranje what-if scenarijev...');
       const scenarios = await this.generateScenarios(processStructure);
-      console.log(`✓ Generirano ${scenarios.length} scenarijev\n`);
+      console.log(`Generirano ${scenarios.length} scenarijev\n`);
 
       // Faza 3: Simulacija
-      console.log('⚙️  Faza 3: Simulacija scenarijev...');
+      console.log('Faza 3: Simulacija scenarijev...');
       const simulationResults = [];
       
       for (const scenario of scenarios) {
@@ -768,7 +766,7 @@ Vrni JSON z:
       };
 
     } catch (error) {
-      console.error('❌ Napaka pri analizi:', error.message);
+      console.error('Napaka pri analizi:', error.message);
       throw error;
     }
   }
@@ -790,13 +788,13 @@ Vrni JSON z:
 ║          POROČILO O OPTIMIZACIJI PROCESA                     ║
 ╚══════════════════════════════════════════════════════════════╝
 
-📊 TRENUTNO STANJE (AS-IS)
+TRENUTNO STANJE (AS-IS)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Povprečni throughput: ${baseline.metrics.throughput.avg.toFixed(2)} ur
 Povprečni strošek: ${baseline.metrics.cost.avg.toFixed(2)} €
 Število aktivnosti: ${results.processStructure.activities.length}
 
-🔴 IDENTIFICIRANA OZKA GRLA
+IDENTIFICIRANA OZKA GRLA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
 
@@ -809,7 +807,7 @@ ${idx + 1}. ${bn.activityName} (${bn.severity.toUpperCase()})
     });
 
     report += `
-💡 PRIPOROČILA ZA IZBOLJŠAVE
+PRIPOROČILA ZA IZBOLJŠAVE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
 
@@ -828,7 +826,7 @@ ${idx + 1}. ${rec.title} [${rec.type.toUpperCase()}]
     });
 
     report += `
-⚖️  TRADE-OFF ANALIZA
+TRADE-OFF ANALIZA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${results.tradeoffAnalysis.analysis}
 
@@ -837,7 +835,7 @@ Priporočeni scenariji:
 - Optimalen za čas: ${results.tradeoffAnalysis.recommendations.timeOptimal}
 - Uravnotežen: ${results.tradeoffAnalysis.recommendations.balanced}
 
-📈 PRIMERJAVA SCENARIJEV
+PRIMERJAVA SCENARIJEV
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
 
@@ -858,18 +856,8 @@ ${result.scenario}:
 // API EXPORT FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 
-// Singleton instance for server usage
-let agentInstance: BPMNOptimizationAgent | null = null;
-
-function getAgent(): BPMNOptimizationAgent {
-  if (!agentInstance) {
-    const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyCvqvBIFscgo9xlWCHe_dkVjq0W8sl0Ulk';
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY environment variable is required');
-    }
-    agentInstance = new BPMNOptimizationAgent(apiKey);
-  }
-  return agentInstance;
+function getAgent(providerConfig?: AIProviderConfig): BPMNOptimizationAgent {
+  return new BPMNOptimizationAgent(providerConfig);
 }
 
 /**
@@ -877,9 +865,10 @@ function getAgent(): BPMNOptimizationAgent {
  */
 export async function analyzeProcessStructure(
   processDescription: string,
-  bpmnXml?: string
+  bpmnXml?: string,
+  providerConfig?: AIProviderConfig
 ): Promise<Agent3AnalyzeResponse> {
-  const agent = getAgent();
+  const agent = getAgent(providerConfig);
 
   console.log('Agent3: Extracting process structure...');
   const processStructure = await agent.extractProcessStructure(processDescription, bpmnXml);
@@ -895,9 +884,10 @@ export async function analyzeProcessStructure(
  * Generate what-if scenarios for a process structure
  */
 export async function generateProcessScenarios(
-  processStructure: ProcessStructure
+  processStructure: ProcessStructure,
+  providerConfig?: AIProviderConfig
 ): Promise<Agent3ScenariosResponse> {
-  const agent = getAgent();
+  const agent = getAgent(providerConfig);
 
   console.log('Agent3: Generating what-if scenarios...');
   const scenarios = await agent.generateScenarios(processStructure);
@@ -915,9 +905,10 @@ export async function generateProcessScenarios(
 export async function simulateProcess(
   processStructure: ProcessStructure,
   scenarios: Scenario[],
-  numInstances: number = 100
+  numInstances: number = 100,
+  providerConfig?: AIProviderConfig
 ): Promise<Agent3SimulateResponse> {
-  const agent = getAgent();
+  const agent = getAgent(providerConfig);
 
   console.log(`Agent3: Simulating process with ${numInstances} instances per scenario...`);
   const simulationResults: SimulationResult[] = [];
@@ -957,9 +948,10 @@ export async function simulateProcess(
  */
 export async function optimizeProcess(
   processStructure: ProcessStructure,
-  simulationResults: SimulationResult[]
+  simulationResults: SimulationResult[],
+  providerConfig?: AIProviderConfig
 ): Promise<Agent3OptimizeResponse> {
-  const agent = getAgent();
+  const agent = getAgent(providerConfig);
 
   const baselineResult = simulationResults[0];
   if (!baselineResult) {
@@ -1001,9 +993,10 @@ export async function optimizeProcess(
 export async function fullProcessAnalysis(
   processDescription: string,
   bpmnXml?: string,
-  numInstances: number = 50
+  numInstances: number = 50,
+  providerConfig?: AIProviderConfig
 ): Promise<Agent3FullAnalysisResponse> {
-  const agent = getAgent();
+  const agent = getAgent(providerConfig);
 
   console.log('Agent3: Starting full process analysis...');
 
@@ -1050,10 +1043,6 @@ export { BPMNOptimizationAgent };
 //     console.log(report);
 //
 //     await fs.writeFile('process_optimization_report.txt', report);
-//     console.log('\n✅ Analiza uspešno zaključena!');
-//     console.log('📄 Poročilo shranjeno v: process_optimization_report.txt');
-//     console.log('📊 Podatki shranjeni v: optimization_results.json');
-//     console.log('📋 Event log shranjen v: baseline_event_log.csv');
 //
 //   } catch (error: any) {
 //     console.error('Napaka:', error.message);
