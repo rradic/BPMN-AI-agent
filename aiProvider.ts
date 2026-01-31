@@ -26,6 +26,46 @@ export interface GenerationResult {
 // Default API keys (fallbacks - not recommended for production)
 const DEFAULT_GEMINI_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyCvqvBIFscgo9xlWCHe_dkVjq0W8sl0Ulk';
 
+// ═══════════════════════════════════════════════════════════════
+// RETRY UTILITY
+// ═══════════════════════════════════════════════════════════════
+
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 1000;
+
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Retry wrapper for async functions with exponential backoff
+ */
+export async function withRetry<T>(
+    fn: () => Promise<T>,
+    context: string = 'API call',
+    maxRetries: number = MAX_RETRIES
+): Promise<T> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
+
+            if (attempt < maxRetries) {
+                const delay = RETRY_DELAY_MS * Math.pow(2, attempt - 1);
+                console.warn(`[Retry ${attempt}/${maxRetries}] ${context} failed: ${lastError.message}. Retrying in ${delay}ms...`);
+                await sleep(delay);
+            } else {
+                console.error(`[Failed] ${context} failed after ${maxRetries} attempts: ${lastError.message}`);
+            }
+        }
+    }
+
+    throw lastError;
+}
+
 /**
  * Get AI provider configuration from request headers
  */
@@ -37,27 +77,29 @@ export function getProviderConfig(headers: Record<string, string | undefined>): 
 }
 
 /**
- * Generate content using the specified AI provider
+ * Generate content using the specified AI provider (with retry)
  */
 export async function generateContent(
     config: AIProviderConfig,
     prompt: string,
     options: GenerationOptions
 ): Promise<GenerationResult> {
-    switch (config.model) {
-        case 'gemini':
-            return generateWithGemini(config.apiKey || DEFAULT_GEMINI_KEY, prompt, options);
-        case 'openai':
-            return generateWithOpenAI(config.apiKey, prompt, options);
-        case 'claude':
-            return generateWithClaude(config.apiKey, prompt, options);
-        default:
-            throw new Error(`Unsupported AI model: ${config.model}`);
-    }
+    return withRetry(async () => {
+        switch (config.model) {
+            case 'gemini':
+                return generateWithGemini(config.apiKey || DEFAULT_GEMINI_KEY, prompt, options);
+            case 'openai':
+                return generateWithOpenAI(config.apiKey, prompt, options);
+            case 'claude':
+                return generateWithClaude(config.apiKey, prompt, options);
+            default:
+                throw new Error(`Unsupported AI model: ${config.model}`);
+        }
+    }, `generateContent (${config.model})`);
 }
 
 /**
- * Generate content with file (for PDF analysis)
+ * Generate content with file (for PDF analysis) - with retry
  */
 export async function generateContentWithFile(
     config: AIProviderConfig,
@@ -66,16 +108,18 @@ export async function generateContentWithFile(
     prompt: string,
     options: GenerationOptions
 ): Promise<GenerationResult> {
-    switch (config.model) {
-        case 'gemini':
-            return generateWithGeminiFile(config.apiKey || DEFAULT_GEMINI_KEY, filePath, mimeType, prompt, options);
-        case 'openai':
-            return generateWithOpenAIFile(config.apiKey, filePath, mimeType, prompt, options);
-        case 'claude':
-            return generateWithClaudeFile(config.apiKey, filePath, mimeType, prompt, options);
-        default:
-            throw new Error(`Unsupported AI model: ${config.model}`);
-    }
+    return withRetry(async () => {
+        switch (config.model) {
+            case 'gemini':
+                return generateWithGeminiFile(config.apiKey || DEFAULT_GEMINI_KEY, filePath, mimeType, prompt, options);
+            case 'openai':
+                return generateWithOpenAIFile(config.apiKey, filePath, mimeType, prompt, options);
+            case 'claude':
+                return generateWithClaudeFile(config.apiKey, filePath, mimeType, prompt, options);
+            default:
+                throw new Error(`Unsupported AI model: ${config.model}`);
+        }
+    }, `generateContentWithFile (${config.model})`);
 }
 
 // ═══════════════════════════════════════════════════════════════
